@@ -10,11 +10,22 @@
 
 #include <JuceHeader.h>
 
+
 //==============================================================================
 /**
 */
 class SimpleEQAudioProcessor  : public juce::AudioProcessor
 {
+public:
+    // To coordinate GUI and DSP variables
+    
+    float minFreq = 20.f;
+    float maxFreq = 20000.f;
+    float midFreq = sqrt(minFreq * maxFreq);
+    float freqSkewFactor = log(0.5) / log((midFreq - minFreq) / (maxFreq - minFreq)); //source: https://jucestepbystep.wordpress.com/logarithmic-sliders/
+    float linSkewFactor = 1.0f;
+
+    juce::AudioProcessorValueTreeState treeState{ *this, nullptr, "PARAMETERS", createParameterLayout() };
 public:
     //==============================================================================
     SimpleEQAudioProcessor();
@@ -52,6 +63,10 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+
+    //==============================================================================
+
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
 private:
     //==============================================================================

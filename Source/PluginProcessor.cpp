@@ -166,7 +166,8 @@ bool SimpleEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleEQAudioProcessor::createEditor()
 {
-    return new SimpleEQAudioProcessorEditor (*this);
+    //return new SimpleEQAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -183,9 +184,34 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // whose contents will have been created by the getStateInformation() call.
 }
 
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Frequency", "LowCut Frequency", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, freqSkewFactor), 20.f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Frequency", "HighCut Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 20000.f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Frequency", "Band Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Gain", "Band Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, linSkewFactor), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Quality", "Band Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
+
+    juce::StringArray dbPerOctave;
+    for (int i = 0; i < 4; i++) 
+        dbPerOctave.add(std::to_string(12 + i * 12));
+
+    
+    layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", dbPerOctave, 0, "dB/Oct"));
+    layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", dbPerOctave, 0, "dB/Oct"));
+
+
+    return layout;
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new SimpleEQAudioProcessor();
+    
 }
