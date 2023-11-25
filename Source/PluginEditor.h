@@ -69,6 +69,8 @@ struct ResponseCurveComponent : juce::Component, juce::AudioProcessorParameter::
     void updateChain();
 
     void paint(juce::Graphics& g) override;
+    void resized() override;
+
     template<int Index, typename Filter>
     inline void getMagForFreqSingle(double& mag, Filter& filter, const double freq);
     template<typename Filter>
@@ -77,6 +79,11 @@ private:
     SimpleEQAudioProcessor& audioProcessor;
     juce::Atomic<bool> parametersChanged{ false };
     MonoChain monoChain;
+
+    juce::Image background;
+
+    juce::Rectangle<int> getRenderArea();
+    juce::Rectangle<int> getAnalysisArea();
 };
 
 //==============================================================================
