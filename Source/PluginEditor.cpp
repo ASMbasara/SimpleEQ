@@ -11,7 +11,16 @@
 
 //==============================================================================
 SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    :
+    AudioProcessorEditor (&p),
+    audioProcessor (p),
+    bandFreqSliderAttachment(audioProcessor.treeState, "Band Frequency", bandFreqSlider),
+    bandGainSliderAttachment(audioProcessor.treeState, "Band Gain", bandGainSlider),
+    bandQualitySliderAttachment(audioProcessor.treeState, "Band Quality", bandQualitySlider),
+    lowCutFreqSliderAttachment(audioProcessor.treeState,"LowCut Frequency", lowCutFreqSlider),
+    highCutFreqSliderAttachment(audioProcessor.treeState, "HighCut Frequency", highCutFreqSlider),
+    lowCutSlopeSliderAttachment(audioProcessor.treeState,"LowCut Slope" ,lowCutSlopeSlider),
+    highCutSlopeSliderAttachment(audioProcessor.treeState,"HighCut Slope", highCutSlopeSlider)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -47,8 +56,10 @@ void SimpleEQAudioProcessorEditor::resized()
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
 
-    lowCutFreqSlider.setBounds(lowCutArea);
-    highCutFreqSlider.setBounds(highCutArea);
+    lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
+    lowCutSlopeSlider.setBounds(lowCutArea);
+    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
+    highCutSlopeSlider.setBounds(highCutArea);
 
     bandFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     bandGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
@@ -63,7 +74,9 @@ std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
         &bandGainSlider,
         &bandQualitySlider,
         &lowCutFreqSlider,
-        &highCutFreqSlider
+        &highCutFreqSlider,
+        &lowCutSlopeSlider,
+        &highCutSlopeSlider
     };   
 
 }

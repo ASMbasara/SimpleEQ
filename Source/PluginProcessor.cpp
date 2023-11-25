@@ -187,6 +187,7 @@ void SimpleEQAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 
+    //stores the params value in order to start it in next execution
     juce::MemoryOutputStream mos(destData, true);
     treeState.state.writeToStream(mos);
 }
@@ -196,6 +197,7 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 
+    //restores last execution params values
     auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
     if (tree.isValid()) {
         treeState.replaceState(tree);
