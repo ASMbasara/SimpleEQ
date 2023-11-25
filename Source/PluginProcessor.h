@@ -10,7 +10,9 @@
 
 #include <JuceHeader.h>
 
-
+using Filter = juce::dsp::IIR::Filter<float>;
+using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
 
 enum ChainPositions {
     LowCut,
@@ -35,6 +37,8 @@ struct ChainSettings {
     Slope highCutSlope = Slope_12;
 };
 
+using Coefficients = Filter::CoefficientsPtr;
+Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate);
 
 //==============================================================================
 /**
@@ -96,10 +100,6 @@ public:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
 private:
-    using Filter = juce::dsp::IIR::Filter<float>;
-    using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
-    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
-
     MonoChain leftChain, rightChain;
 
     void updateBandCoefficients(ChainSettings chainSettings);

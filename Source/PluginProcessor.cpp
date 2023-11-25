@@ -249,7 +249,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
 
 void SimpleEQAudioProcessor::updateBandCoefficients(ChainSettings chainSettings)
 {
-    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.bandFreq, chainSettings.bandQ, juce::Decibels::decibelsToGain(chainSettings.bandGain));
+    auto peakCoefficients = makeBandFilter(chainSettings, getSampleRate());
 
     *leftChain.get<Band>().coefficients = *peakCoefficients;
     *rightChain.get<Band>().coefficients = *peakCoefficients;
@@ -274,6 +274,8 @@ void SimpleEQAudioProcessor::updateLowFilters(ChainSettings chainSettings)
     updateCutCoefficients(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
     updateCutCoefficients(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
 }
+
+
 
 void SimpleEQAudioProcessor::updateBandFilters(ChainSettings chainSettings)
 {
