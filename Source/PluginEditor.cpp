@@ -15,7 +15,10 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    for (auto* comp : getComps()) {
+        addAndMakeVisible(comp);
+    }
+    setSize (800, 600);
 }
 
 SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
@@ -37,4 +40,30 @@ void SimpleEQAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+
+    auto bounds = getLocalBounds();
+    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+
+    auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
+    auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
+
+    lowCutFreqSlider.setBounds(lowCutArea);
+    highCutFreqSlider.setBounds(highCutArea);
+
+    bandFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
+    bandGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
+    bandQualitySlider.setBounds(bounds);
+}
+
+std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
+{
+    
+    return{
+        &bandFreqSlider,
+        &bandGainSlider,
+        &bandQualitySlider,
+        &lowCutFreqSlider,
+        &highCutFreqSlider
+    };   
+
 }
