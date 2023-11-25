@@ -9,35 +9,17 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-//==============================================================================
-SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcessor& p)
-    :
-    AudioProcessorEditor (&p),
-    audioProcessor (p),
-    bandFreqSliderAttachment(audioProcessor.treeState, "Band Frequency", bandFreqSlider),
-    bandGainSliderAttachment(audioProcessor.treeState, "Band Gain", bandGainSlider),
-    bandQualitySliderAttachment(audioProcessor.treeState, "Band Quality", bandQualitySlider),
-    lowCutFreqSliderAttachment(audioProcessor.treeState,"LowCut Frequency", lowCutFreqSlider),
-    highCutFreqSliderAttachment(audioProcessor.treeState, "HighCut Frequency", highCutFreqSlider),
-    lowCutSlopeSliderAttachment(audioProcessor.treeState,"LowCut Slope" ,lowCutSlopeSlider),
-    highCutSlopeSliderAttachment(audioProcessor.treeState,"HighCut Slope", highCutSlopeSlider)
+ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) : audioProcessor(p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    for (auto* comp : getComps()) {
-        addAndMakeVisible(comp);
-    }
-
     const auto& params = audioProcessor.getParameters();
     for (auto param : params) {
         param->addListener(this);
     }
 
     startTimerHz(60);
-    setSize (800, 600);
 }
 
-SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
+ResponseCurveComponent::~ResponseCurveComponent()
 {
     const auto& params = audioProcessor.getParameters();
     for (auto param : params) {
@@ -45,14 +27,39 @@ SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
     }
 }
 
-//==============================================================================
-void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
+void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
+{
+    parametersChanged.set(true);
+}
+
+void ResponseCurveComponent::timerCallback()
+{
+    if (parametersChanged.compareAndSetBool(false, true)) {
+        //update monochain
+        double sampleRate = audioProcessor.getSampleRate();
+        auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
+
+        auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate());
+        auto& bandFilterCoefficients = monoChain.get<Band>().coefficients;
+        bandFilterCoefficients = peakCoefficients;
+
+        auto newLowCutCoefficients = makeLowCutFilter(chainSettings, sampleRate);
+        audioProcessor.updateCutCoefficients(monoChain.get<LowCut>(), newLowCutCoefficients, chainSettings.lowCutSlope);
+
+        auto newHighCutCoefficients = makeHighCutFilter(chainSettings, sampleRate);
+        audioProcessor.updateCutCoefficients(monoChain.get<HighCut>(), newHighCutCoefficients, chainSettings.highCutSlope);
+
+        //signal a repaint
+        repaint();
+    }
+}
+
+void ResponseCurveComponent::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (juce::Colours::black);
+    g.fillAll(juce::Colours::black);
 
-    auto bounds = getLocalBounds();
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+    auto responseArea = getLocalBounds();
     auto width = responseArea.getWidth();
 
     auto& lowcut = monoChain.get<LowCut>();
@@ -82,9 +89,9 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
     const double outputMax = responseArea.getY();
 
     auto map = [outputMin, outputMax](double input)
-    {
-        return juce::jmap(input, -24.0, 24.0, outputMin, outputMax);
-    };
+        {
+            return juce::jmap(input, -24.0, 24.0, outputMin, outputMax);
+        };
 
     responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
 
@@ -99,13 +106,53 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
     g.strokePath(responseCurve, juce::PathStrokeType(2.f));
 }
 
+//==============================================================================
+SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcessor& p)
+    :
+    AudioProcessorEditor (&p),
+    audioProcessor (p),
+    responseCurveComponent(audioProcessor),
+    bandFreqSliderAttachment(audioProcessor.treeState, "Band Frequency", bandFreqSlider),
+    bandGainSliderAttachment(audioProcessor.treeState, "Band Gain", bandGainSlider),
+    bandQualitySliderAttachment(audioProcessor.treeState, "Band Quality", bandQualitySlider),
+    lowCutFreqSliderAttachment(audioProcessor.treeState,"LowCut Frequency", lowCutFreqSlider),
+    highCutFreqSliderAttachment(audioProcessor.treeState, "HighCut Frequency", highCutFreqSlider),
+    lowCutSlopeSliderAttachment(audioProcessor.treeState,"LowCut Slope" ,lowCutSlopeSlider),
+    highCutSlopeSliderAttachment(audioProcessor.treeState,"HighCut Slope", highCutSlopeSlider)
+{
+    // Make sure that before the constructor has finished, you've set the
+    // editor's size to whatever you need it to be.
+    for (auto* comp : getComps()) {
+        addAndMakeVisible(comp);
+    }
+
+    
+    setSize (800, 600);
+}
+
+SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
+{
+
+}
+
+//==============================================================================
+void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
+{
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll (juce::Colours::black);
+
+    
+}
+
 void SimpleEQAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+    juce::Rectangle<int> responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+
+    responseCurveComponent.setBounds(responseArea);
 
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
@@ -120,32 +167,6 @@ void SimpleEQAudioProcessorEditor::resized()
     bandQualitySlider.setBounds(bounds);
 }
 
-void SimpleEQAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
-{
-    parametersChanged.set(true);
-}
-
-void SimpleEQAudioProcessorEditor::timerCallback()
-{
-    if (parametersChanged.compareAndSetBool(false, true)) {
-        //update monochain
-        double sampleRate = audioProcessor.getSampleRate();
-        auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
-
-        auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate());
-        auto& bandFilterCoefficients = monoChain.get<Band>().coefficients;
-        bandFilterCoefficients = peakCoefficients;
-
-        auto newLowCutCoefficients = makeLowCutFilter(chainSettings, sampleRate);
-        audioProcessor.updateCutCoefficients(monoChain.get<LowCut>(), newLowCutCoefficients, chainSettings.lowCutSlope);
-
-        auto newHighCutCoefficients = makeHighCutFilter(chainSettings, sampleRate);
-        audioProcessor.updateCutCoefficients(monoChain.get<HighCut>(), newHighCutCoefficients, chainSettings.highCutSlope);
-        
-        //signal a repaint
-        repaint();
-    }
-}
 
 std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
 {
@@ -157,7 +178,8 @@ std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
         &lowCutFreqSlider,
         &highCutFreqSlider,
         &lowCutSlopeSlider,
-        &highCutSlopeSlider
+        &highCutSlopeSlider,
+        &responseCurveComponent
     };   
 
 }
