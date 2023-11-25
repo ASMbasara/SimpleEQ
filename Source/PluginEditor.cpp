@@ -81,7 +81,7 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
         sliderBounds.getY(),
         sliderBounds.getWidth(),
         sliderBounds.getHeight(),
-        jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
+        param->convertTo0to1(getValue()),
         startAng,
     endAng,
         *this);
@@ -288,14 +288,15 @@ void ResponseCurveComponent::resized()
     Graphics g(background);
 
     Array<float> freqs{
-        20, 30, 40, 50, 100,
-        200, 300, 400, 500, 800, 1000,
-        2000, 3000, 4000, 5000, 8000, 10000,
-        15000, 20000
+        20, 30, 50, 100,
+        200, 300, 500, 1000,
+        2000, 3000, 5000, 10000,
+        20000
     };
 
 
     g.setColour(Colour(66u, 66u, 66u));
+    //
 
     auto analysisArea = getAnalysisArea();
     auto left = analysisArea.getX();
@@ -303,10 +304,13 @@ void ResponseCurveComponent::resized()
     auto top = analysisArea.getY();
     auto bottom = analysisArea.getBottom();
     auto width = analysisArea.getWidth();
+    auto height = analysisArea.getHeight();
 
+    juce::Array<float> x_freq;
     for (auto f : freqs) {
         auto normX = mapFromLog10(f, 20.f, 20000.f);
         auto xs = left + width * normX;
+        x_freq.add(xs);
         g.drawVerticalLine(xs, top, bottom);
     }
 
@@ -314,11 +318,63 @@ void ResponseCurveComponent::resized()
         -24, -12, -6, -3, 0, 3, 6, 12, 24
     };
 
-    float ys;
+    juce::Array<float> y_gain;
     for (auto gDB : gain) {
-        auto y = jmap(gDB, -24.f, 24.f, float(getHeight()), 0.f);
+        auto y = jmap(gDB, -24.f, 24.f, float(bottom), float(top));
         //g.setColour(gDB == 0 ? Colour(0u, 19u, 17u) : Colour(66u, 66u, 66u));
+        y_gain.add(y);
         g.drawHorizontalLine(y, left, right);
+    }
+
+    g.setFont(10);
+    g.setColour(Colours::lightgrey);
+    for (int i = 0; i < freqs.size(); i++) {
+        auto f = freqs[i];
+        auto x = x_freq[i];
+
+        bool addK = false;
+        String str;
+
+        if (f >= 1000.f) {
+            addK = true;
+            f /= 1000.f;
+        }
+
+        str << f;
+        if (addK)
+            str << "k";
+        str << "Hz";
+
+        auto textWidth = g.getCurrentFont().getStringWidth(str);
+
+        Rectangle<float> r;
+        r.setSize(textWidth, g.getCurrentFont().getHeight());
+        r.setCentre(x,0);
+        r.setY(1);
+
+        g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
+
+    }
+
+    for (int i = 0; i < gain.size(); i++) {
+        auto y = gain[i];
+        auto x = y_gain[i];
+        String str;
+        
+        if (y > 0)
+            str << "+" << String(y);
+        else
+            str = String(y);
+
+        auto textWidth = g.getCurrentFont().getStringWidth(str);
+
+        Rectangle<float> r;
+        r.setSize(textWidth, g.getCurrentFont().getHeight());
+        r.setCentre(0, x);
+        r.setX(left - textWidth - 2 );
+
+        g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
+
     }
 
 
@@ -329,14 +385,19 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
 {
     auto bounds = getLocalBounds();
 
-    bounds.reduce(20, 8);
+    bounds.removeFromTop(12);
+    bounds.removeFromLeft(20);
+    bounds.removeFromRight(2);
+
+
     return bounds;
 }
 juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea()
 {
     auto bounds = getRenderArea();
 
-    bounds.reduce(5,5);
+    bounds.reduce(0,5);
+
     return bounds;
 }
 
