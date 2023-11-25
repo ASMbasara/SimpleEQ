@@ -10,20 +10,29 @@
 
 #include <JuceHeader.h>
 
-struct ChainSettings {
-    float bandFreq = 0;
-    float bandGain = 0;
-    float bandQ = 0.707;
-    float lowCutFreq = 0;
-    float lowCutSlope = 0;
-    float highCutFreq = 0;
-    float highCutSlope = 0;
-};
+
 
 enum ChainPositions {
     LowCut,
     Band,
     HighCut
+};
+
+enum Slope {
+    Slope_12,
+    Slope_24,
+    Slope_36,
+    Slope_48
+};
+
+struct ChainSettings {
+    float bandFreq = 0;
+    float bandGain = 0;
+    float bandQ = 0.707;
+    float lowCutFreq = 0;
+    Slope lowCutSlope = Slope_12;
+    float highCutFreq = 0;
+    Slope highCutSlope = Slope_12;
 };
 
 
