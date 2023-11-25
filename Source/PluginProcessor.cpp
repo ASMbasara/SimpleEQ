@@ -103,6 +103,14 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+
+    auto chainSettings = getChainSettings(treeState);
+
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.bandFreq, chainSettings.bandQ, juce::Decibels::decibelsToGain(chainSettings.bandGain));
+
+    *leftChain.get<Band>().coefficients = *peakCoefficients;
+    *rightChain.get<Band>().coefficients = *peakCoefficients;
+
 }
 
 void SimpleEQAudioProcessor::releaseResources()
@@ -152,6 +160,13 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    auto chainSettings = getChainSettings(treeState);
+
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.bandFreq, chainSettings.bandQ, juce::Decibels::decibelsToGain(chainSettings.bandGain));
+
+    *leftChain.get<Band>().coefficients = *peakCoefficients;
+    *rightChain.get<Band>().coefficients = *peakCoefficients;
+
     juce::dsp::AudioBlock<float> block(buffer);
 
     auto leftBlock = block.getSingleChannelBlock(0);
@@ -188,6 +203,20 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+ChainSettings SimpleEQAudioProcessor::getChainSettings(juce::AudioProcessorValueTreeState& treeState) {
+    ChainSettings settings;
+
+    settings.lowCutFreq = treeState.getRawParameterValue("LowCut Frequency")->load();
+    settings.lowCutSlope = treeState.getRawParameterValue("LowCut Slope")->load();
+    settings.highCutFreq = treeState.getRawParameterValue("HighCut Frequency")->load();
+    settings.highCutSlope = treeState.getRawParameterValue("HighCut Frequency")->load();
+    settings.bandFreq = treeState.getRawParameterValue("Band Frequency")->load();
+    settings.bandGain = treeState.getRawParameterValue("Band Gain")->load();
+    settings.bandQ= treeState.getRawParameterValue("Band Quality")->load();
+
+    return settings;
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::createParameterLayout()

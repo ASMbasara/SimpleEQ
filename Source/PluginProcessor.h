@@ -10,6 +10,22 @@
 
 #include <JuceHeader.h>
 
+struct ChainSettings {
+    float bandFreq = 0;
+    float bandGain = 0;
+    float bandQ = 0.707;
+    float lowCutFreq = 0;
+    float lowCutSlope = 0;
+    float highCutFreq = 0;
+    float highCutSlope = 0;
+};
+
+enum ChainPositions {
+    LowCut,
+    Band,
+    HighCut
+};
+
 
 //==============================================================================
 /**
@@ -63,6 +79,8 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+
+    ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& treeState);
 
     //==============================================================================
 
