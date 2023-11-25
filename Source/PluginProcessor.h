@@ -38,9 +38,11 @@ struct ChainSettings {
 };
 
 using Coefficients = Filter::CoefficientsPtr;
+using IIRCoefficients = juce::dsp::IIR::Coefficients<float>;
+
 Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate);
-auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate);
-auto makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate);
+juce::ReferenceCountedArray<IIRCoefficients> makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate);
+juce::ReferenceCountedArray<IIRCoefficients> makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate);
 
 //==============================================================================
 /**
@@ -101,17 +103,20 @@ public:
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-private:
-    MonoChain leftChain, rightChain;
-
     void updateBandCoefficients(ChainSettings chainSettings);
     template<typename ChainType, typename CoefficientType>
-    void updateCutCoefficients(ChainType& leftLowCut, const CoefficientType& cutCoefficients, const Slope &lowCutSlope);
-
+    void updateCutCoefficients(ChainType& leftLowCut, const CoefficientType& cutCoefficients, const Slope& lowCutSlope);
     void updateFilters();
     void updateLowFilters(ChainSettings chainSettings);
     void updateBandFilters(ChainSettings chainSettings);
     void updateHighFilters(ChainSettings chainSettings);
+
+private:
+    MonoChain leftChain, rightChain;
+
+    
+
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SimpleEQAudioProcessor)
         

@@ -12,10 +12,12 @@
 Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate) {
     return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.bandFreq, chainSettings.bandQ, juce::Decibels::decibelsToGain(chainSettings.bandGain));
 
-}auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate) {
+}
+juce::ReferenceCountedArray<IIRCoefficients> makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
 
-}auto makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate) {
+}
+juce::ReferenceCountedArray<IIRCoefficients> makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq, sampleRate, 2 * (chainSettings.highCutSlope + 1));
 }
 
