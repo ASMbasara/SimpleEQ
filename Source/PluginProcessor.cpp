@@ -240,7 +240,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Frequency", "HighCut Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 20000.f, "Hz"));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("Band Frequency", "Band Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f, "Hz"));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Gain", "Band Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, linSkewFactor), 0.f, "dB"));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Gain", "Band Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, linSkewFactor), 0.f, "dB"));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Band Quality", "Band Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
 
     juce::StringArray dbPerOctave;

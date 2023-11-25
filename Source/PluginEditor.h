@@ -15,6 +15,8 @@ using APVTS = juce::AudioProcessorValueTreeState;
 using Attachment = APVTS::SliderAttachment;
 
 
+
+
 struct LookAndFeel : juce::LookAndFeel_V4 {
 
     void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
@@ -36,6 +38,12 @@ struct RotarySliderWithLabels : juce::Slider {
         setLookAndFeel(nullptr);
     }
 
+    struct LabelPos {
+        float pos;
+        juce::String label;
+    };
+
+    juce::Array<LabelPos> labels;
     void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const { return 14; }
@@ -57,6 +65,8 @@ struct ResponseCurveComponent : juce::Component, juce::AudioProcessorParameter::
     void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override { }
 
     void timerCallback() override;
+
+    void updateChain();
 
     void paint(juce::Graphics& g) override;
     template<int Index, typename Filter>

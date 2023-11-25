@@ -85,18 +85,54 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
         startAng,
     endAng,
         *this);
+       
+    auto center = sliderBounds.toFloat().getCentre();
+    auto radius = sliderBounds.getWidth() * 0.5f;
+
+    g.setColour(Colour(0u, 70u, 70u));
+    g.setFont(getTextHeight());
+
+    auto numChoices = labels.size();
+    for (int i = 0; i < numChoices; i++) {
+        auto pos = labels[i].pos;
+        bool above = pos > 0.25f && pos < 0.75f;
+        jassert(0.f <= pos);
+        jassert(pos <= 1.f);
+
+        auto ang = jmap(pos, 0.f, 1.f, startAng, endAng);
+
+        auto c = center.getPointOnCircumference(radius + getTextHeight() * 1, ang);
+
+        Rectangle<float> r;
+        auto text = labels[i].label;
+        auto strWidth = g.getCurrentFont().getStringWidth(text);
+        r.setSize(strWidth + 4, getTextHeight() + 2);
+        r.setCentre(c);
+        above ? r.setY(r.getY() - getTextHeight() * 0.33) : r.setY(r.getY() + getTextHeight() * 0.33);
+
+
+        g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
+    }
 }
 
 juce::String RotarySliderWithLabels::getDisplayString() const
 {
-    if (juce::AudioParameterChoice* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param))
-        return choiceParam->getCurrentChoiceName();
+    if (juce::AudioParameterChoice* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param)) {
+        juce::String val = choiceParam->getCurrentChoiceName();
+        if (choiceParam->getParameterID().containsWholeWord("Slope")) {
+            val.append(" ", 1);
+            val.append(suffix, suffix.length());
+        }
+        return val;
+    }
 
     juce::String str;
-    bool addK = false;;
+    bool addK = false;
+
     
     if (juce::AudioParameterFloat* floatParam = dynamic_cast<juce::AudioParameterFloat*>(param)) {
         
+
         float value = getValue();
 
         if ( value >= 1000.f) {
@@ -104,6 +140,8 @@ juce::String RotarySliderWithLabels::getDisplayString() const
             addK = true;
         }
 
+        if (getName().contains("Slope"))
+            value = 12 + value * 12;
         str = juce::String(value, (addK ? 2 : 0));
     }
     else {
@@ -144,6 +182,8 @@ ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) : audi
     }
 
     startTimerHz(60);
+
+    updateChain();
 }
 
 ResponseCurveComponent::~ResponseCurveComponent()
@@ -163,23 +203,28 @@ void ResponseCurveComponent::timerCallback()
 {
     if (parametersChanged.compareAndSetBool(false, true)) {
         //update monochain
-        double sampleRate = audioProcessor.getSampleRate();
-        auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
-
-        auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate());
-        auto& bandFilterCoefficients = monoChain.get<Band>().coefficients;
-        bandFilterCoefficients = peakCoefficients;
-
-        auto newLowCutCoefficients = makeLowCutFilter(chainSettings, sampleRate);
-        audioProcessor.updateCutCoefficients(monoChain.get<LowCut>(), newLowCutCoefficients, chainSettings.lowCutSlope);
-
-        auto newHighCutCoefficients = makeHighCutFilter(chainSettings, sampleRate);
-        audioProcessor.updateCutCoefficients(monoChain.get<HighCut>(), newHighCutCoefficients, chainSettings.highCutSlope);
-
+        
+        updateChain();
         //signal a repaint
         repaint();
     }
 }
+
+void ResponseCurveComponent::updateChain() {
+    double sampleRate = audioProcessor.getSampleRate();
+    auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
+
+    auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate());
+    auto& bandFilterCoefficients = monoChain.get<Band>().coefficients;
+    bandFilterCoefficients = peakCoefficients;
+
+    auto newLowCutCoefficients = makeLowCutFilter(chainSettings, sampleRate);
+    audioProcessor.updateCutCoefficients(monoChain.get<LowCut>(), newLowCutCoefficients, chainSettings.lowCutSlope);
+
+    auto newHighCutCoefficients = makeHighCutFilter(chainSettings, sampleRate);
+    audioProcessor.updateCutCoefficients(monoChain.get<HighCut>(), newHighCutCoefficients, chainSettings.highCutSlope);
+}
+
 
 void ResponseCurveComponent::paint(juce::Graphics& g)
 {
@@ -256,6 +301,30 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+    juce::String minFreq = "20 Hz";
+    juce::String maxFreq = "20 kHz";
+    juce::String minGain = "-24 dB";
+    juce::String maxGain = "24 dB";
+    bandFreqSlider.labels.add({ 0.f, minFreq });
+    bandFreqSlider.labels.add({ 1.f, maxFreq });
+    bandGainSlider.labels.add({ 0.f, minGain });
+    bandGainSlider.labels.add({ 1.f, maxGain });
+    bandQualitySlider.labels.add({ 0.f, "0.1" });
+    bandQualitySlider.labels.add({ 1.f, "10"});
+    lowCutFreqSlider.labels.add({ 0.f, minFreq });
+    lowCutFreqSlider.labels.add({ 1.f, maxFreq });
+    highCutFreqSlider.labels.add({ 0.f, minFreq });
+    highCutFreqSlider.labels.add({ 1.f, maxFreq });
+
+    float slopePos = 0;
+    juce::Array<juce::String> slopeStr = { "12", "24", "36", "48" };
+    for (int i = 0; i < 4; i++) {
+        slopePos = 0 + 0.333333 * i;
+        lowCutSlopeSlider.labels.add({ slopePos, slopeStr[i] });
+        highCutSlopeSlider.labels.add({ slopePos, slopeStr[i] });
+    }
+
+    
     for (auto* comp : getComps()) {
         addAndMakeVisible(comp);
     }
