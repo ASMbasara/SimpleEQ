@@ -27,11 +27,22 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     for (auto* comp : getComps()) {
         addAndMakeVisible(comp);
     }
+
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params) {
+        param->addListener(this);
+    }
+
+    startTimerHz(60);
     setSize (800, 600);
 }
 
 SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params) {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -118,7 +129,13 @@ void SimpleEQAudioProcessorEditor::timerCallback()
 {
     if (parametersChanged.compareAndSetBool(false, true)) {
         //update monochain
+        auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
+        auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate());
+        auto& bandFilterCoefficients = monoChain.get<Band>().coefficients;
+        bandFilterCoefficients = peakCoefficients;
+        
         //signal a repaint
+        repaint();
     }
 }
 
