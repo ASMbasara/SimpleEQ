@@ -30,8 +30,8 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
         Rectangle<float> r;
         r.setLeft(center.getX() - 2);
         r.setRight(center.getX() + 2);
-        r.setTop(bounds.getY());
-        r.setBottom(center.getY() - rswl->getTextHeight() * 1.5);
+        r.setTop(bounds.getY() + 4.5f);
+        r.setBottom(center.getY() - rswl->getTextHeight() * 2.5);
 
         p.addRoundedRectangle(r.toFloat(), 4.f, 1.f);
 
@@ -64,17 +64,17 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
 {
     using namespace juce;
 
-    auto startAng = degreesToRadians(180.f + 45.f); 
-    auto endAng = startAng - MathConstants<double>::halfPi + MathConstants<double>::twoPi;
+    float startAng = degreesToRadians(180.f + 45.f); 
+    float endAng = startAng - MathConstants<double>::halfPi + MathConstants<double>::twoPi;
 
     auto range = getRange();
 
     auto sliderBounds = getSliderBounds();
 
-    g.setColour(Colour(0u, 19u, 17u));
+    /*g.setColour(Colour(0u, 19u, 17u));
     g.drawRect(getLocalBounds());
     g.setColour(Colour(41u, 23u, 19u));
-    g.drawRect(getSliderBounds());
+    g.drawRect(getSliderBounds());*/
 
     getLookAndFeel().drawRotarySlider(g,
         sliderBounds.getX(),
@@ -284,9 +284,11 @@ void SimpleEQAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
-    juce::Rectangle<int> responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+    float ratio = 40.f / 100.f;//JUCE_LIVE_CONSTANT(33) / 100.f;  //25.f / 100.f;
+    juce::Rectangle<int> responseArea = bounds.removeFromTop(bounds.getHeight() * ratio);
 
     responseCurveComponent.setBounds(responseArea);
+    bounds.removeFromTop(5);
 
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
