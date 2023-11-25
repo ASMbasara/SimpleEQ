@@ -18,10 +18,8 @@ using Attachment = APVTS::SliderAttachment;
 struct LookAndFeel : juce::LookAndFeel_V4 {
 
     void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
-        const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider& slider) override
-    {
-        
-    }
+        const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider& slider) override;
+    
 
 };
 
@@ -38,10 +36,11 @@ struct RotarySliderWithLabels : juce::Slider {
         setLookAndFeel(nullptr);
     }
 
-    void paint(juce::Graphics& g) override {};
+    void paint(juce::Graphics& g) override;
     juce::Rectangle<int> getSliderBounds() const;
     int getTextHeight() const { return 14; }
     juce::String getDisplayString() const;
+    juce::Rectangle<int> getSliderBounds();
 private:
     LookAndFeel lnf;
     juce::RangedAudioParameter* param;
