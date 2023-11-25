@@ -39,6 +39,8 @@ struct ChainSettings {
 
 using Coefficients = Filter::CoefficientsPtr;
 Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate);
+auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate);
+auto makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate);
 
 //==============================================================================
 /**
