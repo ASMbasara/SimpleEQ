@@ -103,7 +103,8 @@ private:
     MonoChain leftChain, rightChain;
 
     void updateBandCoefficients(ChainSettings chainSettings);
-    void updateLowCutCoefficients(ChainSettings chainSettings);
+    template<typename ChainType, typename CoefficientType>
+    void updateCutCoefficients(ChainType& leftLowCut, CoefficientType& cutCoefficients, ChainSettings& chainSettings);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SimpleEQAudioProcessor)
         
