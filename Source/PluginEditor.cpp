@@ -111,6 +111,13 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     :
     AudioProcessorEditor (&p),
     audioProcessor (p),
+    bandFreqSlider(*audioProcessor.treeState.getParameter("Band Frequency"), "Hz"),
+    bandGainSlider(*audioProcessor.treeState.getParameter("Band Gain"), "dB"),
+    bandQualitySlider(*audioProcessor.treeState.getParameter("Band Quality"), ""),
+    lowCutFreqSlider(*audioProcessor.treeState.getParameter("LowCut Frequency"), "Hz"),
+    highCutFreqSlider(*audioProcessor.treeState.getParameter("HighCut Frequency"), "Hz"),
+    lowCutSlopeSlider(*audioProcessor.treeState.getParameter("LowCut Slope"), "dB/Oct"),
+    highCutSlopeSlider(*audioProcessor.treeState.getParameter("HighCut Slope"), "dB/Oct"),
     responseCurveComponent(audioProcessor),
     bandFreqSliderAttachment(audioProcessor.treeState, "Band Frequency", bandFreqSlider),
     bandGainSliderAttachment(audioProcessor.treeState, "Band Gain", bandGainSlider),
