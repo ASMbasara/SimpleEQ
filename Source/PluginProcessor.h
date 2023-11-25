@@ -105,6 +105,11 @@ private:
     void updateBandCoefficients(ChainSettings chainSettings);
     template<typename ChainType, typename CoefficientType>
     void updateCutCoefficients(ChainType& leftLowCut, const CoefficientType& cutCoefficients, const Slope &lowCutSlope);
+
+    void updateFilters();
+    void updateLowFilters(ChainSettings chainSettings);
+    void updateBandFilters(ChainSettings chainSettings);
+    void updateHighFilters(ChainSettings chainSettings);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SimpleEQAudioProcessor)
         

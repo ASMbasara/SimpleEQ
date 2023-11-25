@@ -104,17 +104,7 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
-    auto chainSettings = getChainSettings(treeState);
-
-    updateBandCoefficients(chainSettings);
-
-    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
-
-    auto& leftLowCut = leftChain.get<LowCut>();
-    auto& rightLowCut = rightChain.get<LowCut>();
-
-    updateCutCoefficients(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
-    updateCutCoefficients(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+    updateFilters();
 }
 
 void SimpleEQAudioProcessor::releaseResources()
@@ -164,17 +154,7 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    auto chainSettings = getChainSettings(treeState);
-
-    updateBandCoefficients(chainSettings);
-    
-    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
-
-    auto& leftLowCut = leftChain.get<LowCut>();
-    auto& rightLowCut = rightChain.get<LowCut>();
-
-    updateCutCoefficients(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
-    updateCutCoefficients(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+    updateFilters();
 
     juce::dsp::AudioBlock<float> block(buffer);
 
@@ -220,7 +200,7 @@ ChainSettings SimpleEQAudioProcessor::getChainSettings(juce::AudioProcessorValue
     settings.lowCutFreq = treeState.getRawParameterValue("LowCut Frequency")->load();
     settings.lowCutSlope = static_cast<Slope>(treeState.getRawParameterValue("LowCut Slope")->load());
     settings.highCutFreq = treeState.getRawParameterValue("HighCut Frequency")->load();
-    settings.highCutSlope = static_cast<Slope>(treeState.getRawParameterValue("HighCut Frequency")->load());
+    settings.highCutSlope = static_cast<Slope>(treeState.getRawParameterValue("HighCut Slope")->load());
     settings.bandFreq = treeState.getRawParameterValue("Band Frequency")->load();
     settings.bandGain = treeState.getRawParameterValue("Band Gain")->load();
     settings.bandQ= treeState.getRawParameterValue("Band Quality")->load();
@@ -232,12 +212,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Frequency", "LowCut Frequency", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, freqSkewFactor), 20.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Frequency", "LowCut Frequency", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, freqSkewFactor), 20.f, "Hz"));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Frequency", "HighCut Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 20000.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Frequency", "HighCut Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 20000.f, "Hz"));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Frequency", "Band Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Gain", "Band Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, linSkewFactor), 0.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Frequency", "Band Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f, "Hz"));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Gain", "Band Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, linSkewFactor), 0.f, "dB"));
     layout.add(std::make_unique<juce::AudioParameterFloat>("Band Quality", "Band Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
 
     juce::StringArray dbPerOctave;
@@ -258,6 +238,42 @@ void SimpleEQAudioProcessor::updateBandCoefficients(ChainSettings chainSettings)
 
     *leftChain.get<Band>().coefficients = *peakCoefficients;
     *rightChain.get<Band>().coefficients = *peakCoefficients;
+}
+
+void SimpleEQAudioProcessor::updateFilters()
+{
+    auto chainSettings = getChainSettings(treeState);
+
+    updateLowFilters(chainSettings);
+    updateBandFilters(chainSettings);
+    updateHighFilters(chainSettings);
+}
+
+void SimpleEQAudioProcessor::updateLowFilters(ChainSettings chainSettings)
+{
+    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
+
+    auto& leftLowCut = leftChain.get<LowCut>();
+    auto& rightLowCut = rightChain.get<LowCut>();
+
+    updateCutCoefficients(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+    updateCutCoefficients(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+}
+
+void SimpleEQAudioProcessor::updateBandFilters(ChainSettings chainSettings)
+{
+    updateBandCoefficients(chainSettings);
+}
+
+void SimpleEQAudioProcessor::updateHighFilters(ChainSettings chainSettings)
+{
+    auto highCutCoefficients = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq, getSampleRate(), 2 * (chainSettings.highCutSlope + 1));
+
+    auto& leftHighCut = leftChain.get<HighCut>();
+    auto& rightHighCut = rightChain.get<HighCut>();
+
+    updateCutCoefficients(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
+    updateCutCoefficients(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
 }
 
 template<int Index, typename ChainType, typename CoefficientType>
