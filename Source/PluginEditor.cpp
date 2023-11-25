@@ -38,11 +38,54 @@ SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
 void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll (juce::Colours::black);
 
-    g.setColour (juce::Colours::white);
-    g.setFont (45.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    auto bounds = getLocalBounds();
+    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+    auto width = responseArea.getWidth();
+
+    auto& lowcut = monoChain.get<LowCut>();
+    auto& band = monoChain.get<Band>();
+    auto& highcut = monoChain.get<HighCut>();
+
+    auto sampleRate = audioProcessor.getSampleRate();
+
+    std::vector<double> mags(width);
+
+    for (int i = 0; i < width; i++) {
+        double mag = 1.f;
+        auto freq = juce::mapToLog10(double(i) / double(width), 20.0, 20000.0);
+
+        if (!monoChain.isBypassed<Band>())
+            mag *= band.coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        getMagForFreq(mag, lowcut, 4, freq);
+        getMagForFreq(mag, highcut, 4, freq);
+
+        mags[i] = juce::Decibels::gainToDecibels(mag);
+    }
+
+    juce::Path responseCurve;
+
+    const double outputMin = responseArea.getBottom();
+    const double outputMax = responseArea.getY();
+
+    auto map = [outputMin, outputMax](double input)
+    {
+        return juce::jmap(input, -24.0, 24.0, outputMin, outputMax);
+    };
+
+    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
+
+    for (size_t i = 0; i < mags.size(); i++) {
+        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
+    }
+
+    g.setColour(juce::Colours::darkcyan);
+    g.drawRoundedRectangle(responseArea.toFloat(), 4.f, 1.f);
+
+    g.setColour(juce::Colours::white);
+    g.strokePath(responseCurve, juce::PathStrokeType(2.f));
 }
 
 void SimpleEQAudioProcessorEditor::resized()
