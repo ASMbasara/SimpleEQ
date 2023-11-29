@@ -14,6 +14,11 @@ using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
 
+enum Channel {
+    Right,
+    Left
+};
+
 enum ChainPositions {
     LowCut,
     Band,

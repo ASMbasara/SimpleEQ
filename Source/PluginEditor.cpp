@@ -15,10 +15,10 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
 
     auto bounds = Rectangle<float>(x, y, width, height);
 
-    g.setColour(Colour(0u, 70u, 70u));
+    g.setColour(lightBlue);
     g.fillEllipse(bounds);
 
-    g.setColour(Colour(0u, 19u, 17u));
+    g.setColour(darkBlue);
     g.drawEllipse(bounds, 5.f);
 
 
@@ -27,10 +27,11 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
 
         Path p;
 
+        
         Rectangle<float> r;
         r.setLeft(center.getX() - 2);
         r.setRight(center.getX() + 2);
-        r.setTop(bounds.getY() + 4.5f);
+        r.setTop(bounds.getY() + bounds.getWidth()*0.05);
         r.setBottom(center.getY() - rswl->getTextHeight() * 2.5);
 
         p.addRoundedRectangle(r.toFloat(), 4.f, 1.f);
@@ -89,7 +90,7 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
 
-    g.setColour(Colour(0u, 70u, 70u));
+    g.setColour(lightBlue);
     g.setFont(getTextHeight());
 
     auto numChoices = labels.size();
@@ -273,7 +274,7 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
     }
 
-    g.setColour(juce::Colours::darkcyan);
+    g.setColour(darkBlue);
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
 
     g.setColour(juce::Colours::white);
@@ -295,7 +296,7 @@ void ResponseCurveComponent::resized()
     };
 
 
-    g.setColour(Colour(66u, 66u, 66u));
+    g.setColour(dimGrey);
     //
 
     auto analysisArea = getAnalysisArea();
@@ -327,7 +328,7 @@ void ResponseCurveComponent::resized()
     }
 
     g.setFont(10);
-    g.setColour(Colours::lightgrey);
+    g.setColour(lightBlue);
     for (int i = 0; i < freqs.size(); i++) {
         auto f = freqs[i];
         auto x = x_freq[i];

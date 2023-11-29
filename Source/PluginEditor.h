@@ -14,6 +14,13 @@
 using APVTS = juce::AudioProcessorValueTreeState;
 using Attachment = APVTS::SliderAttachment;
 
+//====================COLOURS=====================
+
+static juce::Colour lightBlue(0u, 70u, 70u);
+static juce::Colour darkBlue(0u, 19u, 17u);
+static juce::Colour dimGrey(66u, 66u, 66u);
+
+
 
 
 
