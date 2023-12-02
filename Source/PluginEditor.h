@@ -13,14 +13,11 @@
 #include "PluginProcessor.h"
 #include "RotarySliderWithLabels.h"
 #include "ResponseCurveComponent.h"
+#include "CustomComboBox.h"
 
 using APVTS = juce::AudioProcessorValueTreeState;
 using Attachment = APVTS::SliderAttachment;
-
-//====================COLOURS=====================
-
-
-
+using ComboBoxAttachment = APVTS::ComboBoxAttachment;
 
 
 //==============================================================================
@@ -44,15 +41,24 @@ private:
 
     ResponseCurveComponent responseCurveComponent;
 
-    RotarySliderWithLabels bandFreqSlider, bandGainSlider, bandQualitySlider, lowCutFreqSlider, highCutFreqSlider, lowCutSlopeSlider, highCutSlopeSlider;
+    RotarySliderWithLabels bandFreqSlider;
+    RotarySliderWithLabels bandGainSlider;
+    RotarySliderWithLabels bandQualitySlider;
+    RotarySliderWithLabels lowCutFreqSlider;
+    RotarySliderWithLabels highCutFreqSlider;
+    
+    CustomComboBox lowCutSlopeCombo;
+    CustomComboBox highCutSlopeCombo;
 
-    Attachment bandFreqSliderAttachment,
-               bandGainSliderAttachment,
-               bandQualitySliderAttachment,
-               lowCutFreqSliderAttachment,
-               highCutFreqSliderAttachment,
-               lowCutSlopeSliderAttachment,
-               highCutSlopeSliderAttachment;
+    Attachment bandFreqSliderAttachment;
+    Attachment bandGainSliderAttachment;
+    Attachment bandQualitySliderAttachment;
+    Attachment lowCutFreqSliderAttachment;
+    Attachment highCutFreqSliderAttachment;
+
+    ComboBoxAttachment lowCutSlopeSliderAttachment;
+    ComboBoxAttachment highCutSlopeSliderAttachment;
+               
 
     
     std::vector<juce::Component*> getComps();

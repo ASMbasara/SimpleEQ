@@ -25,16 +25,16 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     bandQualitySlider(*audioProcessor.treeState.getParameter("Band Quality"), ""),
     lowCutFreqSlider(*audioProcessor.treeState.getParameter("LowCut Frequency"), "Hz"),
     highCutFreqSlider(*audioProcessor.treeState.getParameter("HighCut Frequency"), "Hz"),
-    lowCutSlopeSlider(*audioProcessor.treeState.getParameter("LowCut Slope"), "dB/Oct"),
-    highCutSlopeSlider(*audioProcessor.treeState.getParameter("HighCut Slope"), "dB/Oct"),
+    lowCutSlopeCombo(juce::String("LowCut Slope"), juce::String("dB/Oct")),
+    highCutSlopeCombo(juce::String("HighCut Slope"), juce::String("dB/Oct")),
     responseCurveComponent(audioProcessor),
     bandFreqSliderAttachment(audioProcessor.treeState, "Band Frequency", bandFreqSlider),
     bandGainSliderAttachment(audioProcessor.treeState, "Band Gain", bandGainSlider),
     bandQualitySliderAttachment(audioProcessor.treeState, "Band Quality", bandQualitySlider),
     lowCutFreqSliderAttachment(audioProcessor.treeState,"LowCut Frequency", lowCutFreqSlider),
     highCutFreqSliderAttachment(audioProcessor.treeState, "HighCut Frequency", highCutFreqSlider),
-    lowCutSlopeSliderAttachment(audioProcessor.treeState,"LowCut Slope" ,lowCutSlopeSlider),
-    highCutSlopeSliderAttachment(audioProcessor.treeState,"HighCut Slope", highCutSlopeSlider)
+    lowCutSlopeSliderAttachment(audioProcessor.treeState,"LowCut Slope" ,lowCutSlopeCombo),
+    highCutSlopeSliderAttachment(audioProcessor.treeState,"HighCut Slope", highCutSlopeCombo)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -53,13 +53,22 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     highCutFreqSlider.labels.add({ 0.f, minFreq });
     highCutFreqSlider.labels.add({ 1.f, maxFreq });
 
-    float slopePos = 0;
+
+    
+    int slopeVal=12, firstSlopeVal=slopeVal;
     juce::Array<juce::String> slopeStr = { "12", "24", "36", "48" };
+    juce::String suffix(" dB/Oct");
     for (int i = 0; i < 4; i++) {
-        slopePos = 0 + 0.333333 * i;
-        lowCutSlopeSlider.labels.add({ slopePos, slopeStr[i] });
-        highCutSlopeSlider.labels.add({ slopePos, slopeStr[i] });
+        slopeVal = slopeVal + 12 * i;
+        lowCutSlopeCombo.addItem(slopeStr[i] + suffix, slopeVal);
+        highCutSlopeCombo.addItem(slopeStr[i] + suffix, slopeVal);
     }
+
+    lowCutSlopeCombo.setSelectedId(firstSlopeVal);
+    lowCutSlopeCombo.setEditableText(true);
+    highCutSlopeCombo.setSelectedId(firstSlopeVal);
+    highCutSlopeCombo.setSelectedId(firstSlopeVal);
+       
 
     
     for (auto* comp : getComps()) {
@@ -100,9 +109,12 @@ void SimpleEQAudioProcessorEditor::resized()
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
 
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
-    lowCutSlopeSlider.setBounds(lowCutArea);
+    lowCutSlopeCombo.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.2));
+
     highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
-    highCutSlopeSlider.setBounds(highCutArea);
+    juce::Rectangle<int> highSlopeRect = highCutArea.removeFromTop(highCutArea.getHeight() * 0.2);
+    highSlopeRect.removeFromRight(highCutArea.getWidth() * 0.66);
+    highCutSlopeCombo.setBounds(highCutArea);
 
     bandFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     bandGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
@@ -119,8 +131,8 @@ std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
         &bandQualitySlider,
         &lowCutFreqSlider,
         &highCutFreqSlider,
-        &lowCutSlopeSlider,
-        &highCutSlopeSlider,
+        &lowCutSlopeCombo,
+        &highCutSlopeCombo,
         &responseCurveComponent
     };   
 
