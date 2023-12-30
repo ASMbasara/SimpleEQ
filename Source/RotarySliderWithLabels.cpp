@@ -6,7 +6,7 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
 
     auto bounds = Rectangle<float>(x, y, width, height);
 
-    g.setColour(lightBlue);
+    g.setColour(midBlue);
     g.fillEllipse(bounds);
 
     g.setColour(darkBlue);

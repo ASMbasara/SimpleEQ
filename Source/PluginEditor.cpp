@@ -65,9 +65,8 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     }
 
     lowCutSlopeCombo.setSelectedId(firstSlopeVal);
-    lowCutSlopeCombo.setEditableText(true);
     highCutSlopeCombo.setSelectedId(firstSlopeVal);
-    highCutSlopeCombo.setSelectedId(firstSlopeVal);
+
        
 
     
@@ -100,21 +99,30 @@ void SimpleEQAudioProcessorEditor::resized()
 
     auto bounds = getLocalBounds();
     float ratio = 40.f / 100.f;//JUCE_LIVE_CONSTANT(33) / 100.f;  //25.f / 100.f;
+    float slopeWidthCut = 0.2;
     juce::Rectangle<int> responseArea = bounds.removeFromTop(bounds.getHeight() * ratio);
 
     responseCurveComponent.setBounds(responseArea);
     bounds.removeFromTop(5);
+    bounds.removeFromLeft(5);
+    bounds.removeFromRight(5);
 
-    auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
-    auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
+
+    auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.2);
+    auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.25);
 
     lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
-    lowCutSlopeCombo.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.2));
+    juce::Rectangle<int> lowSlopeRect = lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.2);
+    lowSlopeRect.removeFromRight(lowCutArea.getWidth() * slopeWidthCut);
+    lowSlopeRect.removeFromLeft(lowCutArea.getWidth() * slopeWidthCut);
+    lowCutSlopeCombo.setBounds(lowSlopeRect);
+    
 
-    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
+    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.4));
     juce::Rectangle<int> highSlopeRect = highCutArea.removeFromTop(highCutArea.getHeight() * 0.2);
-    highSlopeRect.removeFromRight(highCutArea.getWidth() * 0.66);
-    highCutSlopeCombo.setBounds(highCutArea);
+    highSlopeRect.removeFromRight(highCutArea.getWidth() * slopeWidthCut);
+    highSlopeRect.removeFromLeft(highCutArea.getWidth() * slopeWidthCut);
+    highCutSlopeCombo.setBounds(highSlopeRect);
 
     bandFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     bandGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
