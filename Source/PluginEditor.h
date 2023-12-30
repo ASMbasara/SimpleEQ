@@ -41,18 +41,30 @@ private:
 
     ResponseCurveComponent responseCurveComponent;
 
-    RotarySliderWithLabels bandFreqSlider;
-    RotarySliderWithLabels bandGainSlider;
-    RotarySliderWithLabels bandQualitySlider;
+    RotarySliderWithLabels band1FreqSlider;
+    RotarySliderWithLabels band1GainSlider;
+    RotarySliderWithLabels band1QualitySlider;
+    RotarySliderWithLabels band2FreqSlider;
+    RotarySliderWithLabels band2GainSlider;
+    RotarySliderWithLabels band2QualitySlider;
+    RotarySliderWithLabels band3FreqSlider;
+    RotarySliderWithLabels band3GainSlider;
+    RotarySliderWithLabels band3QualitySlider;
     RotarySliderWithLabels lowCutFreqSlider;
     RotarySliderWithLabels highCutFreqSlider;
     
     CustomComboBox lowCutSlopeCombo;
     CustomComboBox highCutSlopeCombo;
 
-    Attachment bandFreqSliderAttachment;
-    Attachment bandGainSliderAttachment;
-    Attachment bandQualitySliderAttachment;
+    Attachment band1FreqSliderAttachment;
+    Attachment band1GainSliderAttachment;
+    Attachment band1QualitySliderAttachment;
+    Attachment band2FreqSliderAttachment;
+    Attachment band2GainSliderAttachment;
+    Attachment band2QualitySliderAttachment;
+    Attachment band3FreqSliderAttachment;
+    Attachment band3GainSliderAttachment;
+    Attachment band3QualitySliderAttachment;
     Attachment lowCutFreqSliderAttachment;
     Attachment highCutFreqSliderAttachment;
 

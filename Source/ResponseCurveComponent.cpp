@@ -41,9 +41,22 @@ void ResponseCurveComponent::updateChain() {
     double sampleRate = audioProcessor.getSampleRate();
     auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
 
-    auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate());
-    auto& bandFilterCoefficients = monoChain.get<Band>().coefficients;
-    bandFilterCoefficients = peakCoefficients;
+    for (int i = 0; i < audioProcessor.nBands; i++) {
+        auto peakCoefficients = makeBandFilter(chainSettings, audioProcessor.getSampleRate(), i);
+        if (i == 0) {
+            auto& bandFilterCoefficients = monoChain.get<Band1>().coefficients;
+            bandFilterCoefficients = peakCoefficients;
+        }
+        if (i == 1) {
+            auto& bandFilterCoefficients = monoChain.get<Band2>().coefficients;
+            bandFilterCoefficients = peakCoefficients;
+        }
+        if (i == 2) {
+            auto& bandFilterCoefficients = monoChain.get<Band3>().coefficients;
+            bandFilterCoefficients = peakCoefficients;
+        }
+        
+    }
 
     auto newLowCutCoefficients = makeLowCutFilter(chainSettings, sampleRate);
     audioProcessor.updateCutCoefficients(monoChain.get<LowCut>(), newLowCutCoefficients, chainSettings.lowCutSlope);
@@ -64,7 +77,9 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     auto width = responseArea.getWidth();
 
     auto& lowcut = monoChain.get<LowCut>();
-    auto& band = monoChain.get<Band>();
+    auto& band1 = monoChain.get<Band1>();
+    auto& band2 = monoChain.get<Band2>();
+    auto& band3 = monoChain.get<Band3>();
     auto& highcut = monoChain.get<HighCut>();
 
     auto sampleRate = audioProcessor.getSampleRate();
@@ -75,8 +90,12 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         double mag = 1.f;
         auto freq = juce::mapToLog10(double(i) / double(width), 20.0, 20000.0);
 
-        if (!monoChain.isBypassed<Band>())
-            mag *= band.coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!monoChain.isBypassed<Band1>())
+            mag *= band1.coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!monoChain.isBypassed<Band2>())
+            mag *= band2.coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!monoChain.isBypassed<Band3>())
+            mag *= band3.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         getMagForFreq(mag, lowcut, 4, freq);
         getMagForFreq(mag, highcut, 4, freq);

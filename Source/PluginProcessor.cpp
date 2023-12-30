@@ -9,8 +9,13 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate) {
-    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.bandFreq, chainSettings.bandQ, juce::Decibels::decibelsToGain(chainSettings.bandGain));
+Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate, int index) {
+    if(index==0)
+        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.band1Freq, chainSettings.band1Q, juce::Decibels::decibelsToGain(chainSettings.band1Gain));
+    if (index == 1)
+        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.band2Freq, chainSettings.band2Q, juce::Decibels::decibelsToGain(chainSettings.band2Gain));
+    if (index == 2)
+        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.band3Freq, chainSettings.band3Q, juce::Decibels::decibelsToGain(chainSettings.band3Gain));
 
 }
 juce::ReferenceCountedArray<IIRCoefficients> makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate) {
@@ -224,9 +229,25 @@ ChainSettings SimpleEQAudioProcessor::getChainSettings(juce::AudioProcessorValue
     settings.lowCutSlope = static_cast<Slope>(treeState.getRawParameterValue("LowCut Slope")->load());
     settings.highCutFreq = treeState.getRawParameterValue("HighCut Frequency")->load();
     settings.highCutSlope = static_cast<Slope>(treeState.getRawParameterValue("HighCut Slope")->load());
-    settings.bandFreq = treeState.getRawParameterValue("Band Frequency")->load();
-    settings.bandGain = treeState.getRawParameterValue("Band Gain")->load();
-    settings.bandQ= treeState.getRawParameterValue("Band Quality")->load();
+    juce::String BandId;
+    for (int i = 1; i <= nBands; ++i) {
+        BandId = "Band" + std::to_string(i);
+        if (i == 1) {
+            settings.band1Freq = treeState.getRawParameterValue(BandId + " Frequency")->load();
+            settings.band1Gain = treeState.getRawParameterValue(BandId + " Gain")->load();
+            settings.band1Q = treeState.getRawParameterValue(BandId + " Quality")->load();
+        }
+        if (i == 2) {
+            settings.band2Freq = treeState.getRawParameterValue(BandId + " Frequency")->load();
+            settings.band2Gain = treeState.getRawParameterValue(BandId + " Gain")->load();
+            settings.band2Q = treeState.getRawParameterValue(BandId + " Quality")->load();
+        }
+        if (i == 3) {
+            settings.band3Freq = treeState.getRawParameterValue(BandId + " Frequency")->load();
+            settings.band3Gain = treeState.getRawParameterValue(BandId + " Gain")->load();
+            settings.band3Q = treeState.getRawParameterValue(BandId + " Quality")->load();
+        }
+    }
 
     return settings;
 }
@@ -239,9 +260,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Frequency", "HighCut Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 20000.f, "Hz"));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Frequency", "Band Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f, "Hz"));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Gain", "Band Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, linSkewFactor), 0.f, "dB"));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Band Quality", "Band Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
+    juce::String BandId;
+    for (int i = 1; i <= nBands; ++i) {
+        BandId = "Band" + std::to_string(i);
+        layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Frequency", BandId + " Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f, "Hz"));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Gain", BandId + " Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, linSkewFactor), 0.f, "dB"));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Quality", BandId + " Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
+    }
 
     juce::StringArray dbPerOctave;
     for (int i = 0; i < 4; i++) 
@@ -257,10 +282,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
 
 void SimpleEQAudioProcessor::updateBandCoefficients(ChainSettings chainSettings)
 {
-    auto peakCoefficients = makeBandFilter(chainSettings, getSampleRate());
+    for (int i = 0; i < nBands; ++i) {
+        auto peakCoefficients = makeBandFilter(chainSettings, getSampleRate(), i);
 
-    *leftChain.get<Band>().coefficients = *peakCoefficients;
-    *rightChain.get<Band>().coefficients = *peakCoefficients;
+        if (i == 0) {
+            *leftChain.get<Band1>().coefficients = *peakCoefficients;
+            *rightChain.get<Band1>().coefficients = *peakCoefficients;
+        }
+        if (i == 1) {
+            *leftChain.get<Band2>().coefficients = *peakCoefficients;
+            *rightChain.get<Band2>().coefficients = *peakCoefficients;
+        }
+        if (i == 2) {
+            *leftChain.get<Band3>().coefficients = *peakCoefficients;
+            *rightChain.get<Band3>().coefficients = *peakCoefficients;
+        }
+    }
 }
 
 void SimpleEQAudioProcessor::updateFilters()

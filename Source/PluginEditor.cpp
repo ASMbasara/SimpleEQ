@@ -20,17 +20,29 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     :
     AudioProcessorEditor (&p),
     audioProcessor (p),
-    bandFreqSlider(*audioProcessor.treeState.getParameter("Band Frequency"), "Hz"),
-    bandGainSlider(*audioProcessor.treeState.getParameter("Band Gain"), "dB"),
-    bandQualitySlider(*audioProcessor.treeState.getParameter("Band Quality"), ""),
+    band1FreqSlider(*audioProcessor.treeState.getParameter("Band1 Frequency"), "Hz"),
+    band1GainSlider(*audioProcessor.treeState.getParameter("Band1 Gain"), "dB"),
+    band1QualitySlider(*audioProcessor.treeState.getParameter("Band1 Quality"), ""),
+    band2FreqSlider(*audioProcessor.treeState.getParameter("Band2 Frequency"), "Hz"),
+    band2GainSlider(*audioProcessor.treeState.getParameter("Band2 Gain"), "dB"),
+    band2QualitySlider(*audioProcessor.treeState.getParameter("Band2 Quality"), ""),
+    band3FreqSlider(*audioProcessor.treeState.getParameter("Band3 Frequency"), "Hz"),
+    band3GainSlider(*audioProcessor.treeState.getParameter("Band3 Gain"), "dB"),
+    band3QualitySlider(*audioProcessor.treeState.getParameter("Band3 Quality"), ""),
     lowCutFreqSlider(*audioProcessor.treeState.getParameter("LowCut Frequency"), "Hz"),
     highCutFreqSlider(*audioProcessor.treeState.getParameter("HighCut Frequency"), "Hz"),
     lowCutSlopeCombo(juce::String("LowCut Slope"), juce::String("dB/Oct")),
     highCutSlopeCombo(juce::String("HighCut Slope"), juce::String("dB/Oct")),
     responseCurveComponent(audioProcessor),
-    bandFreqSliderAttachment(audioProcessor.treeState, "Band Frequency", bandFreqSlider),
-    bandGainSliderAttachment(audioProcessor.treeState, "Band Gain", bandGainSlider),
-    bandQualitySliderAttachment(audioProcessor.treeState, "Band Quality", bandQualitySlider),
+    band1FreqSliderAttachment(audioProcessor.treeState, "Band1 Frequency", band1FreqSlider),
+    band1GainSliderAttachment(audioProcessor.treeState, "Band1 Gain", band1GainSlider),
+    band1QualitySliderAttachment(audioProcessor.treeState, "Band1 Quality", band1QualitySlider),
+    band2FreqSliderAttachment(audioProcessor.treeState, "Band2 Frequency", band2FreqSlider),
+    band2GainSliderAttachment(audioProcessor.treeState, "Band2 Gain", band2GainSlider),
+    band2QualitySliderAttachment(audioProcessor.treeState, "Band2 Quality", band2QualitySlider),
+    band3FreqSliderAttachment(audioProcessor.treeState, "Band3 Frequency", band3FreqSlider),
+    band3GainSliderAttachment(audioProcessor.treeState, "Band3 Gain", band3GainSlider),
+    band3QualitySliderAttachment(audioProcessor.treeState, "Band3 Quality", band3QualitySlider),
     lowCutFreqSliderAttachment(audioProcessor.treeState,"LowCut Frequency", lowCutFreqSlider),
     highCutFreqSliderAttachment(audioProcessor.treeState, "HighCut Frequency", highCutFreqSlider),
     lowCutSlopeSliderAttachment(audioProcessor.treeState,"LowCut Slope" ,lowCutSlopeCombo),
@@ -42,12 +54,24 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     juce::String maxFreq = "20 kHz";
     juce::String minGain = "-24 dB";
     juce::String maxGain = "24 dB";
-    bandFreqSlider.labels.add({ 0.f, minFreq });
-    bandFreqSlider.labels.add({ 1.f, maxFreq });
-    bandGainSlider.labels.add({ 0.f, minGain });
-    bandGainSlider.labels.add({ 1.f, maxGain });
-    bandQualitySlider.labels.add({ 0.f, "0.1" });
-    bandQualitySlider.labels.add({ 1.f, "10"});
+    band1FreqSlider.labels.add({ 0.f, minFreq });
+    band1FreqSlider.labels.add({ 1.f, maxFreq });
+    band1GainSlider.labels.add({ 0.f, minGain });
+    band1GainSlider.labels.add({ 1.f, maxGain });
+    band1QualitySlider.labels.add({ 0.f, "0.1" });
+    band1QualitySlider.labels.add({ 1.f, "10"});
+    band2FreqSlider.labels.add({ 0.f, minFreq });
+    band2FreqSlider.labels.add({ 1.f, maxFreq });
+    band2GainSlider.labels.add({ 0.f, minGain });
+    band2GainSlider.labels.add({ 1.f, maxGain });
+    band2QualitySlider.labels.add({ 0.f, "0.1" });
+    band2QualitySlider.labels.add({ 1.f, "10" });
+    band3FreqSlider.labels.add({ 0.f, minFreq });
+    band3FreqSlider.labels.add({ 1.f, maxFreq });
+    band3GainSlider.labels.add({ 0.f, minGain });
+    band3GainSlider.labels.add({ 1.f, maxGain });
+    band3QualitySlider.labels.add({ 0.f, "0.1" });
+    band3QualitySlider.labels.add({ 1.f, "10" });
     lowCutFreqSlider.labels.add({ 0.f, minFreq });
     lowCutFreqSlider.labels.add({ 1.f, maxFreq });
     highCutFreqSlider.labels.add({ 0.f, minFreq });
@@ -100,6 +124,7 @@ void SimpleEQAudioProcessorEditor::resized()
     auto bounds = getLocalBounds();
     float ratio = 40.f / 100.f;//JUCE_LIVE_CONSTANT(33) / 100.f;  //25.f / 100.f;
     float slopeWidthCut = 0.2;
+    int nBands = 3;
     juce::Rectangle<int> responseArea = bounds.removeFromTop(bounds.getHeight() * ratio);
 
     responseCurveComponent.setBounds(responseArea);
@@ -124,9 +149,20 @@ void SimpleEQAudioProcessorEditor::resized()
     highSlopeRect.removeFromLeft(highCutArea.getWidth() * slopeWidthCut);
     highCutSlopeCombo.setBounds(highSlopeRect);
 
-    bandFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
-    bandGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
-    bandQualitySlider.setBounds(bounds);
+    juce::Rectangle<int> bandRect = bounds.removeFromLeft(bounds.getWidth() * 0.33);
+    band1FreqSlider.setBounds(bandRect.removeFromTop(bounds.getHeight() * 0.33));
+    band1GainSlider.setBounds(bandRect.removeFromTop(bounds.getHeight() * 0.33));
+    band1QualitySlider.setBounds(bandRect);
+
+    bandRect = bounds.removeFromLeft(bounds.getWidth() * 0.5);
+    band2FreqSlider.setBounds(bandRect.removeFromTop(bounds.getHeight() * 0.33));
+    band2GainSlider.setBounds(bandRect.removeFromTop(bounds.getHeight() * 0.33));
+    band2QualitySlider.setBounds(bandRect);
+
+    bandRect = bounds;
+    band3FreqSlider.setBounds(bandRect.removeFromTop(bounds.getHeight() * 0.33));
+    band3GainSlider.setBounds(bandRect.removeFromTop(bounds.getHeight() * 0.33));
+    band3QualitySlider.setBounds(bandRect);
 }
 
 
@@ -134,9 +170,15 @@ std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
 {
     
     return{
-        &bandFreqSlider,
-        &bandGainSlider,
-        &bandQualitySlider,
+        &band1FreqSlider,
+        &band1GainSlider,
+        &band1QualitySlider,
+        &band2FreqSlider,
+        &band2GainSlider,
+        &band2QualitySlider,
+        &band3FreqSlider,
+        &band3GainSlider,
+        &band3QualitySlider,
         &lowCutFreqSlider,
         &highCutFreqSlider,
         &lowCutSlopeCombo,

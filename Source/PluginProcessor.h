@@ -12,7 +12,7 @@
 
 using Filter = juce::dsp::IIR::Filter<float>;
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
-using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, Filter, Filter, CutFilter>;
 
 enum Channel {
     Right,
@@ -21,7 +21,9 @@ enum Channel {
 
 enum ChainPositions {
     LowCut,
-    Band,
+    Band1,
+    Band2,
+    Band3,
     HighCut
 };
 
@@ -33,9 +35,15 @@ enum Slope {
 };
 
 struct ChainSettings {
-    float bandFreq = 0;
-    float bandGain = 0;
-    float bandQ = 0.707;
+    float band1Freq = 0;
+    float band1Gain = 0;
+    float band1Q = 0.707;
+    float band2Freq = 0;
+    float band2Gain = 0;
+    float band2Q = 0.707;
+    float band3Freq = 0;
+    float band3Gain = 0;
+    float band3Q = 0.707;
     float lowCutFreq = 0;
     Slope lowCutSlope = Slope_12;
     float highCutFreq = 0;
@@ -45,7 +53,7 @@ struct ChainSettings {
 using Coefficients = Filter::CoefficientsPtr;
 using IIRCoefficients = juce::dsp::IIR::Coefficients<float>;
 
-Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate);
+Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate, int index);
 juce::ReferenceCountedArray<IIRCoefficients> makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate);
 juce::ReferenceCountedArray<IIRCoefficients> makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate);
 
@@ -62,6 +70,7 @@ public:
     float midFreq = sqrt(minFreq * maxFreq);
     float freqSkewFactor = log(0.5) / log((midFreq - minFreq) / (maxFreq - minFreq)); //source: https://jucestepbystep.wordpress.com/logarithmic-sliders/
     float linSkewFactor = 1.0f;
+    const int nBands = 3;
 
     juce::AudioProcessorValueTreeState treeState{ *this, nullptr, "PARAMETERS", createParameterLayout() };
 public:
