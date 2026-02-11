@@ -9,14 +9,25 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate, int index) {
-    if(index==0)
-        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.band1Freq, chainSettings.band1Q, juce::Decibels::decibelsToGain(chainSettings.band1Gain));
-    if (index == 1)
-        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.band2Freq, chainSettings.band2Q, juce::Decibels::decibelsToGain(chainSettings.band2Gain));
-    if (index == 2)
-        return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.band3Freq, chainSettings.band3Q, juce::Decibels::decibelsToGain(chainSettings.band3Gain));
+Coefficients makeBandFilter(const ChainSettings& chainSettings, double sampleRate, int index) 
+{
+    struct PeakFilterParams
+    {
+        double rate = 0.0;
+        float frequency = 0.0;
+		float Q = 0.707;
+		float dBGain = 0.0;
+    };
+	PeakFilterParams params;
 
+    if(index == 0)
+		params = { sampleRate, chainSettings.band1Freq, chainSettings.band1Q, chainSettings.band1Gain };
+    else if (index == 1)
+        params = { sampleRate, chainSettings.band2Freq, chainSettings.band2Q, chainSettings.band2Gain };
+    else if (index == 2)
+        params = { sampleRate, chainSettings.band3Freq, chainSettings.band3Q, chainSettings.band3Gain };
+
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(params.rate, params.frequency, params.Q, juce::Decibels::decibelsToGain(params.dBGain));
 }
 juce::ReferenceCountedArray<IIRCoefficients> makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
