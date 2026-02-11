@@ -143,7 +143,7 @@ void SimpleEQAudioProcessorEditor::resized()
     lowCutSlopeCombo.setBounds(lowSlopeRect);
     
 
-    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.4));
+    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     juce::Rectangle<int> highSlopeRect = highCutArea.removeFromTop(highCutArea.getHeight() * 0.2);
     highSlopeRect.removeFromRight(highCutArea.getWidth() * slopeWidthCut);
     highSlopeRect.removeFromLeft(highCutArea.getWidth() * slopeWidthCut);
