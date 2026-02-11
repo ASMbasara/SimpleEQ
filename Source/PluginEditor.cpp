@@ -52,8 +52,8 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor (SimpleEQAudioProcess
     // editor's size to whatever you need it to be.
     juce::String minFreq = "20 Hz";
     juce::String maxFreq = "20 kHz";
-    juce::String minGain = "-24 dB";
-    juce::String maxGain = "24 dB";
+    juce::String minGain = "-12 dB";
+    juce::String maxGain = "12 dB";
     band1FreqSlider.labels.add({ 0.f, minFreq });
     band1FreqSlider.labels.add({ 1.f, maxFreq });
     band1GainSlider.labels.add({ 0.f, minGain });
@@ -122,7 +122,7 @@ void SimpleEQAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
-    float ratio = 40.f / 100.f;//JUCE_LIVE_CONSTANT(33) / 100.f;  //25.f / 100.f;
+    float ratio = JUCE_LIVE_CONSTANT(33) / 100.f;  //25.f / 100.f;
     float slopeWidthCut = 0.2;
     int nBands = 3;
     juce::Rectangle<int> responseArea = bounds.removeFromTop(bounds.getHeight() * ratio);

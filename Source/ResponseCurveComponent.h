@@ -2,6 +2,7 @@
 #include <JuceHeader.h>
 #include "Looks.h"
 #include "PluginProcessor.h"
+#include "FFTAnalyzer.h"
 
 class ResponseCurveComponent : public juce::Component, juce::AudioProcessorParameter::Listener, juce::Timer
 {
@@ -33,6 +34,10 @@ private:
 
     juce::Rectangle<int> getRenderArea();
     juce::Rectangle<int> getAnalysisArea();
+
+    FFTPathProducer leftPathProducer;
+    juce::TextButton fftToggleButton{ "FFT" };
+    bool showFFT = true;
 };
 
 

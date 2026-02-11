@@ -1,12 +1,26 @@
 #include "ResponseCurveComponent.h"
 
 
-ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) : audioProcessor(p)
+ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) : 
+    audioProcessor(p)
+    ,leftPathProducer(p.leftChannelFifo)
 {
     const auto& params = audioProcessor.getParameters();
     for (auto param : params) {
         param->addListener(this);
     }
+
+    fftToggleButton.setClickingTogglesState(true);
+    fftToggleButton.setToggleState(true, juce::dontSendNotification);
+    fftToggleButton.setColour(juce::TextButton::buttonOnColourId, lightBlue);
+    fftToggleButton.setColour(juce::TextButton::buttonColourId, darkBlue);
+    fftToggleButton.setColour(juce::TextButton::textColourOnId, juce::Colours::white);
+    fftToggleButton.setColour(juce::TextButton::textColourOffId, dimGrey);
+    fftToggleButton.onClick = [this]() 
+        { 
+            showFFT = fftToggleButton.getToggleState(); 
+        };
+    addAndMakeVisible(fftToggleButton);
 
     startTimerHz(60);
 
@@ -28,13 +42,30 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
 
 void ResponseCurveComponent::timerCallback()
 {
-    if (parametersChanged.compareAndSetBool(false, true)) {
-        //update monochain
+    bool needsRepaint = false;
 
+    if (parametersChanged.compareAndSetBool(false, true)) {
         updateChain();
-        //signal a repaint
-        repaint();
+        needsRepaint = true;
     }
+
+    if (showFFT)
+    {
+        auto bounds = getAnalysisArea().toFloat();
+        leftPathProducer.process(bounds, audioProcessor.getSampleRate());
+        needsRepaint = true;
+    }
+    else
+    {
+        if (leftPathProducer.getPath().isEmpty() == false)
+        {
+            leftPathProducer.drain();
+            needsRepaint = true;
+        }
+    }
+
+    if (needsRepaint)
+        repaint();
 }
 
 void ResponseCurveComponent::updateChain() {
@@ -76,6 +107,13 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     auto responseArea = getAnalysisArea();
     auto width = responseArea.getWidth();
 
+    if (showFFT)
+    {
+        auto fftPath = leftPathProducer.getPath();
+        g.setColour(lightBlue.withAlpha(0.6f));
+        g.strokePath(fftPath, juce::PathStrokeType(1.5f));
+    }
+
     auto& lowcut = monoChain.get<LowCut>();
     auto& band1 = monoChain.get<Band1>();
     auto& band2 = monoChain.get<Band2>();
@@ -110,7 +148,7 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 
     auto map = [outputMin, outputMax](double input)
         {
-            return juce::jmap(input, -24.0, 24.0, outputMin, outputMax);
+            return juce::jmap(input, -12.0, 12.0, outputMin, outputMax);
         };
 
     responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
@@ -161,12 +199,12 @@ void ResponseCurveComponent::resized()
     }
 
     Array<float> gain{
-        -24, -12, -6, -3, 0, 3, 6, 12, 24
+        -12, -6, -3, 0, 3, 6, 12
     };
 
     juce::Array<float> y_gain;
     for (auto gDB : gain) {
-        auto y = jmap(gDB, -24.f, 24.f, float(bottom), float(top));
+        auto y = jmap(gDB, -12.f, 12.f, float(bottom), float(top));
         //g.setColour(gDB == 0 ? Colour(0u, 19u, 17u) : Colour(66u, 66u, 66u));
         y_gain.add(y);
         g.drawHorizontalLine(y, left, right);
@@ -223,7 +261,8 @@ void ResponseCurveComponent::resized()
 
     }
 
-
+    auto buttonArea = getLocalBounds().removeFromTop(16).removeFromRight(36);
+    fftToggleButton.setBounds(buttonArea);
 
 }
 

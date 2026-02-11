@@ -194,6 +194,8 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
+
+    leftChannelFifo.push(buffer.getReadPointer(0), buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -275,7 +277,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
     for (int i = 1; i <= nBands; ++i) {
         BandId = "Band" + std::to_string(i);
         layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Frequency", BandId + " Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f, "Hz"));
-        layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Gain", BandId + " Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, linSkewFactor), 0.f, "dB"));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Gain", BandId + " Gain", juce::NormalisableRange<float>(-12.f, 12.f, 0.1f, linSkewFactor), 0.f, "dB"));
         layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Quality", BandId + " Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
     }
 
