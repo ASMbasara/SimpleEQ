@@ -151,11 +151,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_Standalone.cpp" />
-    <ClCompile Include="Source\FFTAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_plugin_client\Standalone\juce_StandaloneFilterWindow.h" />
-    <ClInclude Include="Source\PluginProcessor.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc" />

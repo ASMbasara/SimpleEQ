@@ -13,7 +13,7 @@
 #include "PluginProcessor.h"
 #include "RotarySliderWithLabels.h"
 #include "ResponseCurveComponent.h"
-#include "CustomComboBox.h"
+#include "MinimalCombo.h"
 
 using APVTS = juce::AudioProcessorValueTreeState;
 using Attachment = APVTS::SliderAttachment;
@@ -29,14 +29,10 @@ public:
     SimpleEQAudioProcessorEditor (SimpleEQAudioProcessor&);
     ~SimpleEQAudioProcessorEditor() override;
 
-    //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
-
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     SimpleEQAudioProcessor& audioProcessor;
 
     ResponseCurveComponent responseCurveComponent;
@@ -53,8 +49,8 @@ private:
     RotarySliderWithLabels lowCutFreqSlider;
     RotarySliderWithLabels highCutFreqSlider;
     
-    CustomComboBox lowCutSlopeCombo;
-    CustomComboBox highCutSlopeCombo;
+    MinimalCombo lowCutSlopeCombo;
+    MinimalCombo highCutSlopeCombo;
 
     Attachment band1FreqSliderAttachment;
     Attachment band1GainSliderAttachment;
@@ -71,11 +67,7 @@ private:
     ComboBoxAttachment lowCutSlopeSliderAttachment;
     ComboBoxAttachment highCutSlopeSliderAttachment;
                
-
-    
     std::vector<juce::Component*> getComps();
-
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessorEditor)
 };

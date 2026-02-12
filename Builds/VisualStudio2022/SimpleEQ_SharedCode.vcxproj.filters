@@ -3594,6 +3594,9 @@
     <ClCompile Include="..\..\Source\FFTAnalyzer.cpp">
       <Filter>SimpleEQ\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\MinimalCombo.cpp">
+      <Filter>SimpleEQ\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\PluginProcessor.h">
@@ -7776,6 +7779,9 @@
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\FFTAnalyzer.h">
+      <Filter>SimpleEQ\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\MinimalCombo.h">
       <Filter>SimpleEQ\Source</Filter>
     </ClInclude>
   </ItemGroup>
