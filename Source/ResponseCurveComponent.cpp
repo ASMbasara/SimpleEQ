@@ -15,10 +15,11 @@ ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) :
     fftToggleButton.setToggleState(true, juce::dontSendNotification);
 
     // Minimal modern colors
-    fftToggleButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(70, 150, 255));
-    fftToggleButton.setColour(juce::TextButton::buttonColourId, juce::Colour(30, 32, 38));
-    fftToggleButton.setColour(juce::TextButton::textColourOnId, juce::Colours::white);
-    fftToggleButton.setColour(juce::TextButton::textColourOffId, juce::Colour(120, 125, 135));
+    fftToggleButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(70, 150, 255).withAlpha(0.15f));
+    fftToggleButton.setColour(juce::TextButton::buttonColourId, juce::Colour(25, 27, 32));
+    fftToggleButton.setColour(juce::TextButton::textColourOnId, juce::Colour(70, 150, 255));
+    fftToggleButton.setColour(juce::TextButton::textColourOffId, juce::Colour(80, 85, 95));
+    fftToggleButton.setColour(juce::ComboBox::outlineColourId, juce::Colour(50, 55, 65));
 
     fftToggleButton.onClick = [this]()
         {
@@ -366,7 +367,7 @@ void ResponseCurveComponent::resized()
     }
 
     // Modern FFT button placement
-    auto buttonArea = getLocalBounds().removeFromTop(20).removeFromRight(42).reduced(2);
+    auto buttonArea = analysisArea.removeFromTop(18).removeFromRight(40).reduced(1);
     fftToggleButton.setBounds(buttonArea);
 }
 
@@ -376,7 +377,7 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
 
     bounds.removeFromTop(16);
     bounds.removeFromLeft(32);
-    bounds.removeFromRight(4);
+    bounds.removeFromRight(14);
     bounds.removeFromBottom(2);
 
     return bounds;
