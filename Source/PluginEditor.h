@@ -14,10 +14,12 @@
 #include "RotarySliderWithLabels.h"
 #include "ResponseCurveComponent.h"
 #include "MinimalCombo.h"
+#include "PowerButton.h"
 
 using APVTS = juce::AudioProcessorValueTreeState;
 using Attachment = APVTS::SliderAttachment;
 using ComboBoxAttachment = APVTS::ComboBoxAttachment;
+using ButtonAttachment = APVTS::ButtonAttachment;
 
 
 //==============================================================================
@@ -52,6 +54,12 @@ private:
     MinimalCombo lowCutSlopeCombo;
     MinimalCombo highCutSlopeCombo;
 
+    PowerButton lowCutPowerButton;
+    PowerButton band1PowerButton;
+    PowerButton band2PowerButton;
+    PowerButton band3PowerButton;
+    PowerButton highCutPowerButton;
+
     Attachment band1FreqSliderAttachment;
     Attachment band1GainSliderAttachment;
     Attachment band1QualitySliderAttachment;
@@ -66,6 +74,12 @@ private:
 
     ComboBoxAttachment lowCutSlopeSliderAttachment;
     ComboBoxAttachment highCutSlopeSliderAttachment;
+
+    ButtonAttachment lowCutPowerButtonAttachment;
+    ButtonAttachment band1PowerButtonAttachment;
+    ButtonAttachment band2PowerButtonAttachment;
+    ButtonAttachment band3PowerButtonAttachment;
+    ButtonAttachment highCutPowerButtonAttachment;
                
     std::vector<juce::Component*> getComps();
 

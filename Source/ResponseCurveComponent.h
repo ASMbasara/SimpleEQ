@@ -11,21 +11,12 @@ public:
     ~ResponseCurveComponent();
 
     void parameterValueChanged(int parameterIndex, float newValue) override;
-
     void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override { }
-
-    void timerCallback() override;
-
-    void updateChain();
 
     void paint(juce::Graphics& g) override;
     void resized() override;
 
-    template<int Index, typename Filter>
-    inline void getMagForFreqSingle(double& mag, Filter& filter, const double freq);
-    template<typename Filter>
-    inline void getMagForFreq(double& mag, Filter& filter, const int nFilters, const double freq);
-private:
+protected:
     SimpleEQAudioProcessor& audioProcessor;
     juce::Atomic<bool> parametersChanged{ false };
     MonoChain monoChain;
@@ -37,7 +28,15 @@ private:
 
     FFTPathProducer leftPathProducer;
     juce::TextButton fftToggleButton{ "FFT" };
-    bool showFFT = true;
+    bool bShowFFT = true;
+
+    void updateChain();
+    void timerCallback() override;
+
+    template<int Index, typename Filter>
+    inline void getMagForFreqSingle(double& mag, Filter& filter, const double freq);
+    template<typename Filter>
+    inline void getMagForFreq(double& mag, Filter& filter, const int nFilters, const double freq);
 };
 
 

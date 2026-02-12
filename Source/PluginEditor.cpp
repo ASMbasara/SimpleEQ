@@ -42,7 +42,12 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor(SimpleEQAudioProcesso
     lowCutFreqSliderAttachment(audioProcessor.treeState, "LowCut Frequency", lowCutFreqSlider),
     highCutFreqSliderAttachment(audioProcessor.treeState, "HighCut Frequency", highCutFreqSlider),
     lowCutSlopeSliderAttachment(audioProcessor.treeState, "LowCut Slope", lowCutSlopeCombo),
-    highCutSlopeSliderAttachment(audioProcessor.treeState, "HighCut Slope", highCutSlopeCombo)
+    highCutSlopeSliderAttachment(audioProcessor.treeState, "HighCut Slope", highCutSlopeCombo),
+    lowCutPowerButtonAttachment(audioProcessor.treeState, "LowCut Bypass", lowCutPowerButton),
+    band1PowerButtonAttachment(audioProcessor.treeState, "Band1 Bypass", band1PowerButton),
+    band2PowerButtonAttachment(audioProcessor.treeState, "Band2 Bypass", band2PowerButton),
+    band3PowerButtonAttachment(audioProcessor.treeState, "Band3 Bypass", band3PowerButton),
+    highCutPowerButtonAttachment(audioProcessor.treeState, "HighCut Bypass", highCutPowerButton)
 {
     // Populate Slope Combos
     juce::Array<juce::String> slopeStr = { "12", "24", "36", "48" };
@@ -55,6 +60,12 @@ SimpleEQAudioProcessorEditor::SimpleEQAudioProcessorEditor(SimpleEQAudioProcesso
 
     lowCutSlopeCombo.setSelectedId(12);
     highCutSlopeCombo.setSelectedId(12);
+
+    lowCutPowerButton.setAccentColour(juce::Colour(255, 80, 80));
+    band1PowerButton.setAccentColour(juce::Colour(255, 160, 70));
+    band2PowerButton.setAccentColour(juce::Colour(100, 220, 120));
+    band3PowerButton.setAccentColour(juce::Colour(80, 180, 255));
+    highCutPowerButton.setAccentColour(juce::Colour(180, 100, 255));
 
     for (auto* comp : getComps()) {
         addAndMakeVisible(comp);
@@ -123,7 +134,7 @@ void SimpleEQAudioProcessorEditor::paint(juce::Graphics& g)
     Colour highCutColor(180, 100, 255);   // Purple/Violet
 
     // Helper to draw section backgrounds and titles only
-    auto drawSection = [&g](Rectangle<int> area, const String& title, Colour accentColor) {
+    auto drawSection = [&g](Rectangle<int> area, const String& title, Colour accentColor, PowerButton& powerBtn) {
         area = area.reduced(5, 3);
 
         // Card background
@@ -139,19 +150,29 @@ void SimpleEQAudioProcessorEditor::paint(juce::Graphics& g)
         g.setColour(Colour(40, 45, 52).withAlpha(0.6f));
         g.drawRoundedRectangle(area.toFloat(), 6.0f, 1.0f);
 
-        // Section title
+        // Section title with power button
         Rectangle<int> titleArea = area.removeFromTop(28);
+
+        // Power button on the left
+        auto powerBtnArea = titleArea.removeFromLeft(28).reduced(4);
+        powerBtn.setBounds(powerBtnArea);
+
+        // Remove equal space from the right to keep the title visually centered
+        titleArea.removeFromRight(28);
+
+        // Title text
         g.setColour(accentColor.brighter(0.3f));
         g.setFont(Font("Exo 2", 11.0f, Font::bold));
         g.drawText(title, titleArea, Justification::centred, true);
         };
 
+
     // Draw sections (components draw their own labels)
-    drawSection(lowCutArea, "LOW CUT", lowCutColor);
-    drawSection(band1Area, "BAND 1", band1Color);
-    drawSection(band2Area, "BAND 2", band2Color);
-    drawSection(band3Area, "BAND 3", band3Color);
-    drawSection(highCutArea, "HIGH CUT", highCutColor);
+    drawSection(lowCutArea, "LOW CUT", lowCutColor, lowCutPowerButton);
+    drawSection(band1Area, "BAND 1", band1Color, band1PowerButton);
+    drawSection(band2Area, "BAND 2", band2Color, band2PowerButton);
+    drawSection(band3Area, "BAND 3", band3Color, band3PowerButton);
+    drawSection(highCutArea, "HIGH CUT", highCutColor, highCutPowerButton);
 }
 
 void SimpleEQAudioProcessorEditor::resized()
@@ -179,25 +200,25 @@ void SimpleEQAudioProcessorEditor::resized()
     const float bandWidth = (bounds.getWidth() - 2 * cutWidth) / 3.0f;
 
 	auto fSetCutFilterSection = [&bounds, &cutWidth](RotarySliderWithLabels& freqSlider, MinimalCombo& slopeCombo)
-    {
-			static constexpr float GapRatio = 0.2f;
-			static constexpr float SliderComboRatio = 0.8f;
+        {
+			    static constexpr float GapRatio = 0.2f;
+			    static constexpr float SliderComboRatio = 0.8f;
 
-            auto area = bounds.removeFromLeft(cutWidth).reduced(5, 3);
+                auto area = bounds.removeFromLeft(cutWidth).reduced(5, 3);
 
-            const int gap = area.getHeight() * GapRatio;
-            area.removeFromTop(gap);
-            area.removeFromBottom(gap);
+                const int gap = area.getHeight() * GapRatio;
+                area.removeFromTop(gap);
+                area.removeFromBottom(gap);
 
-            const int availableHeight = area.getHeight();
+                const int availableHeight = area.getHeight();
 
-            auto sliderSpace = availableHeight * SliderComboRatio; 
-            freqSlider.setBounds(area.removeFromTop(sliderSpace));
+                auto sliderSpace = availableHeight * SliderComboRatio; 
+                freqSlider.setBounds(area.removeFromTop(sliderSpace));
 
-            area.removeFromTop(3);
+                area.removeFromTop(3);
 
-            slopeCombo.setBounds(area);
-    };
+                slopeCombo.setBounds(area);
+        };
 
     auto fSetBandFilterSection = [&bounds, &bandWidth](RotarySliderWithLabels& freq, RotarySliderWithLabels& gain, RotarySliderWithLabels& quality)
         {
@@ -238,6 +259,11 @@ std::vector<juce::Component*> SimpleEQAudioProcessorEditor::getComps()
         &highCutFreqSlider,
         &lowCutSlopeCombo,
         &highCutSlopeCombo,
-        &responseCurveComponent
+        &responseCurveComponent,
+        &lowCutPowerButton,
+        &band1PowerButton,
+        &band2PowerButton,
+        &band3PowerButton,
+        &highCutPowerButton
     };
 }

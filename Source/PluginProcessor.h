@@ -39,16 +39,21 @@ struct ChainSettings {
     float band1Freq = 0;
     float band1Gain = 0;
     float band1Q = 0.707;
+    bool band1Bypass = false;
     float band2Freq = 0;
     float band2Gain = 0;
     float band2Q = 0.707;
+	bool band2Bypass = false;
     float band3Freq = 0;
     float band3Gain = 0;
     float band3Q = 0.707;
+	bool band3Bypass = false;
     float lowCutFreq = 0;
     Slope lowCutSlope = Slope_12;
+	bool lowCutBypass = false;
     float highCutFreq = 0;
     Slope highCutSlope = Slope_12;
+	bool highCutBypass = false;
 };
 
 using Coefficients = Filter::CoefficientsPtr;

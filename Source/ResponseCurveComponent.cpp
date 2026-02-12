@@ -22,7 +22,7 @@ ResponseCurveComponent::ResponseCurveComponent(SimpleEQAudioProcessor& p) :
 
     fftToggleButton.onClick = [this]()
         {
-            showFFT = fftToggleButton.getToggleState();
+            bShowFFT = fftToggleButton.getToggleState();
         };
     addAndMakeVisible(fftToggleButton);
 
@@ -53,7 +53,7 @@ void ResponseCurveComponent::timerCallback()
         needsRepaint = true;
     }
 
-    if (showFFT)
+    if (bShowFFT)
     {
         auto bounds = getAnalysisArea().toFloat();
         leftPathProducer.process(bounds, audioProcessor.getSampleRate());
@@ -115,7 +115,7 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     auto width = responseArea.getWidth();
 
     // Draw FFT spectrum with modern gradient
-    if (showFFT)
+    if (bShowFFT)
     {
         auto fftPath = leftPathProducer.getPath();
 
@@ -142,6 +142,7 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     auto& highcut = monoChain.get<HighCut>();
 
     auto sampleRate = audioProcessor.getSampleRate();
+    auto chainSettings = audioProcessor.getChainSettings(audioProcessor.treeState);
 
     std::vector<double> mags(width);
 
@@ -149,15 +150,19 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         double mag = 1.f;
         auto freq = mapToLog10(double(i) / double(width), 20.0, 20000.0);
 
-        if (!monoChain.isBypassed<Band1>())
+        // Check bypass state for bands
+        if (!chainSettings.band1Bypass)  // MODIFIED
             mag *= band1.coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (!monoChain.isBypassed<Band2>())
+        if (!chainSettings.band2Bypass)  // MODIFIED
             mag *= band2.coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (!monoChain.isBypassed<Band3>())
+        if (!chainSettings.band3Bypass)  // MODIFIED
             mag *= band3.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
-        getMagForFreq(mag, lowcut, 4, freq);
-        getMagForFreq(mag, highcut, 4, freq);
+        // Check bypass state for cut filters - ADD THESE CONDITIONS
+        if (!chainSettings.lowCutBypass)
+            getMagForFreq(mag, lowcut, 4, freq);
+        if (!chainSettings.highCutBypass)
+            getMagForFreq(mag, highcut, 4, freq);
 
         mags[i] = Decibels::gainToDecibels(mag);
     }

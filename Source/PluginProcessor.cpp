@@ -240,25 +240,35 @@ ChainSettings SimpleEQAudioProcessor::getChainSettings(juce::AudioProcessorValue
 
     settings.lowCutFreq = treeState.getRawParameterValue("LowCut Frequency")->load();
     settings.lowCutSlope = static_cast<Slope>(treeState.getRawParameterValue("LowCut Slope")->load());
+    settings.lowCutBypass = treeState.getRawParameterValue("LowCut Bypass")->load() < 0.5f;
+
     settings.highCutFreq = treeState.getRawParameterValue("HighCut Frequency")->load();
     settings.highCutSlope = static_cast<Slope>(treeState.getRawParameterValue("HighCut Slope")->load());
+    settings.highCutBypass = treeState.getRawParameterValue("HighCut Bypass")->load() < 0.5f;
+
     juce::String BandId;
     for (int i = 1; i <= nBands; ++i) {
         BandId = "Band" + std::to_string(i);
-        if (i == 1) {
+        if (i == 1) 
+        {
             settings.band1Freq = treeState.getRawParameterValue(BandId + " Frequency")->load();
             settings.band1Gain = treeState.getRawParameterValue(BandId + " Gain")->load();
             settings.band1Q = treeState.getRawParameterValue(BandId + " Quality")->load();
+            settings.band1Bypass = treeState.getRawParameterValue(BandId + " Bypass")->load() < 0.5f;
         }
-        if (i == 2) {
+        if (i == 2) 
+        {
             settings.band2Freq = treeState.getRawParameterValue(BandId + " Frequency")->load();
             settings.band2Gain = treeState.getRawParameterValue(BandId + " Gain")->load();
             settings.band2Q = treeState.getRawParameterValue(BandId + " Quality")->load();
+            settings.band2Bypass = treeState.getRawParameterValue(BandId + " Bypass")->load() < 0.5f;
         }
-        if (i == 3) {
+        if (i == 3)
+        {
             settings.band3Freq = treeState.getRawParameterValue(BandId + " Frequency")->load();
             settings.band3Gain = treeState.getRawParameterValue(BandId + " Gain")->load();
             settings.band3Q = treeState.getRawParameterValue(BandId + " Quality")->load();
+            settings.band3Bypass = treeState.getRawParameterValue(BandId + " Bypass")->load() < 0.5f;
         }
     }
 
@@ -270,8 +280,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Frequency", "LowCut Frequency", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, freqSkewFactor), 20.f, "Hz"));
+    layout.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypass", "LowCut Bypass", true));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Frequency", "HighCut Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 20000.f, "Hz"));
+    layout.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypass", "HighCut Bypass", true));
 
     juce::String BandId;
     for (int i = 1; i <= nBands; ++i) {
@@ -279,6 +291,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
         layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Frequency", BandId + " Frequency", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, freqSkewFactor), 1000.f, "Hz"));
         layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Gain", BandId + " Gain", juce::NormalisableRange<float>(-12.f, 12.f, 0.1f, linSkewFactor), 0.f, "dB"));
         layout.add(std::make_unique<juce::AudioParameterFloat>(BandId + " Quality", BandId + " Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, linSkewFactor), 0.707f));
+        layout.add(std::make_unique<juce::AudioParameterBool>(BandId + " Bypass", BandId + " Bypass", true));
     }
 
     juce::StringArray dbPerOctave;
@@ -296,9 +309,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
 void SimpleEQAudioProcessor::updateBandCoefficients(ChainSettings chainSettings)
 {
     for (int i = 0; i < nBands; ++i) {
-        auto peakCoefficients = makeBandFilter(chainSettings, getSampleRate(), i);
+        // Modify settings to use 0 dB gain when bypassed
+        ChainSettings modifiedSettings = chainSettings;
 
-        if (i == 0) {
+        if (i == 0 && chainSettings.band1Bypass) {
+            modifiedSettings.band1Gain = 0.0f;  // Unity gain = transparent
+        }
+        else if (i == 1 && chainSettings.band2Bypass) {
+            modifiedSettings.band2Gain = 0.0f;
+        }
+        else if (i == 2 && chainSettings.band3Bypass) {
+            modifiedSettings.band3Gain = 0.0f;
+        }
+
+        auto peakCoefficients = makeBandFilter(modifiedSettings, getSampleRate(), i);
+
+        if (i == 0)
+        {
             *leftChain.get<Band1>().coefficients = *peakCoefficients;
             *rightChain.get<Band1>().coefficients = *peakCoefficients;
         }
@@ -329,6 +356,16 @@ void SimpleEQAudioProcessor::updateLowFilters(ChainSettings chainSettings)
     auto& leftLowCut = leftChain.get<LowCut>();
     auto& rightLowCut = rightChain.get<LowCut>();
 
+    leftLowCut.setBypassed<0>(chainSettings.lowCutBypass);  
+    leftLowCut.setBypassed<1>(chainSettings.lowCutBypass);  
+    leftLowCut.setBypassed<2>(chainSettings.lowCutBypass);  
+    leftLowCut.setBypassed<3>(chainSettings.lowCutBypass);  
+
+    rightLowCut.setBypassed<0>(chainSettings.lowCutBypass); 
+    rightLowCut.setBypassed<1>(chainSettings.lowCutBypass); 
+    rightLowCut.setBypassed<2>(chainSettings.lowCutBypass); 
+    rightLowCut.setBypassed<3>(chainSettings.lowCutBypass); 
+
     updateCutCoefficients(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
     updateCutCoefficients(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
 }
@@ -346,6 +383,16 @@ void SimpleEQAudioProcessor::updateHighFilters(ChainSettings chainSettings)
 
     auto& leftHighCut = leftChain.get<HighCut>();
     auto& rightHighCut = rightChain.get<HighCut>();
+
+    leftHighCut.setBypassed<0>(chainSettings.highCutBypass);
+    leftHighCut.setBypassed<1>(chainSettings.highCutBypass);
+    leftHighCut.setBypassed<2>(chainSettings.highCutBypass);
+    leftHighCut.setBypassed<3>(chainSettings.highCutBypass);
+
+    rightHighCut.setBypassed<0>(chainSettings.highCutBypass);
+    rightHighCut.setBypassed<1>(chainSettings.highCutBypass);
+    rightHighCut.setBypassed<2>(chainSettings.highCutBypass);
+    rightHighCut.setBypassed<3>(chainSettings.highCutBypass);
 
     updateCutCoefficients(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
     updateCutCoefficients(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);

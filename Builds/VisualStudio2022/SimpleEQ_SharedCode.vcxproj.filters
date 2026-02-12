@@ -3597,6 +3597,9 @@
     <ClCompile Include="..\..\Source\MinimalCombo.cpp">
       <Filter>SimpleEQ\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\PowerButton.cpp">
+      <Filter>SimpleEQ\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\PluginProcessor.h">
@@ -7782,6 +7785,9 @@
       <Filter>SimpleEQ\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MinimalCombo.h">
+      <Filter>SimpleEQ\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\PowerButton.h">
       <Filter>SimpleEQ\Source</Filter>
     </ClInclude>
   </ItemGroup>
