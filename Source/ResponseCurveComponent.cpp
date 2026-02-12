@@ -151,14 +151,14 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         auto freq = mapToLog10(double(i) / double(width), 20.0, 20000.0);
 
         // Check bypass state for bands
-        if (!chainSettings.band1Bypass)  // MODIFIED
+        if (!chainSettings.band1Bypass)
             mag *= band1.coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (!chainSettings.band2Bypass)  // MODIFIED
+        if (!chainSettings.band2Bypass)
             mag *= band2.coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (!chainSettings.band3Bypass)  // MODIFIED
+        if (!chainSettings.band3Bypass)
             mag *= band3.coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
-        // Check bypass state for cut filters - ADD THESE CONDITIONS
+        // Check bypass state for cut filters
         if (!chainSettings.lowCutBypass)
             getMagForFreq(mag, lowcut, 4, freq);
         if (!chainSettings.highCutBypass)
@@ -206,6 +206,50 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
 
     g.setColour(Colour(150, 240, 255));
     g.strokePath(responseCurve, PathStrokeType(2.2f)); // Main line
+
+    // --- Filter frequency indicators on the response curve ---
+    struct FilterIndicator {
+        float freq;
+        Colour colour;
+        bool bypassed;
+    };
+
+    FilterIndicator indicators[] = {
+        { chainSettings.lowCutFreq,  Colour(255, 80, 80),   chainSettings.lowCutBypass },
+        { chainSettings.band1Freq,   Colour(255, 160, 70),  chainSettings.band1Bypass },
+        { chainSettings.band2Freq,   Colour(100, 220, 120), chainSettings.band2Bypass },
+        { chainSettings.band3Freq,   Colour(80, 180, 255),  chainSettings.band3Bypass },
+        { chainSettings.highCutFreq, Colour(180, 100, 255), chainSettings.highCutBypass },
+    };
+
+    for (auto& ind : indicators)
+    {
+        if (ind.bypassed)
+            continue;
+
+        // Map frequency to x-pixel within the response area
+        auto normX = mapFromLog10(static_cast<double>(ind.freq), 20.0, 20000.0);
+        int pixelIndex = static_cast<int>(normX * width);
+        pixelIndex = jlimit(0, (int)mags.size() - 1, pixelIndex);
+
+        float x = static_cast<float>(responseArea.getX() + pixelIndex);
+        float y = static_cast<float>(map(mags[pixelIndex]));
+
+        constexpr float outerRadius = 6.0f;
+        constexpr float innerRadius = 4.0f;
+
+        // Outer glow
+        g.setColour(ind.colour.withAlpha(0.2f));
+        g.fillEllipse(x - outerRadius, y - outerRadius, outerRadius * 2, outerRadius * 2);
+
+        // Solid inner dot
+        g.setColour(ind.colour);
+        g.fillEllipse(x - innerRadius, y - innerRadius, innerRadius * 2, innerRadius * 2);
+
+        // Bright center highlight
+        g.setColour(ind.colour.brighter(0.5f));
+        g.fillEllipse(x - 1.5f, y - 1.5f, 3.0f, 3.0f);
+    }
 }
 
 void ResponseCurveComponent::resized()
