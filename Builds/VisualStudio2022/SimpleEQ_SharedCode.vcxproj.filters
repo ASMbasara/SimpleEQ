@@ -700,8 +700,17 @@
     <Filter Include="JUCE Library Code">
       <UniqueIdentifier>{7ED5A90E-41AF-A1EF-659B-37CEEAB9BA61}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SimpleEQ\Source\UI Components">
+    <Filter Include="SimpleEQ\Source\GUI">
       <UniqueIdentifier>{f426634b-78ca-4b19-882e-e11162935c12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SimpleEQ\Source\GUI\Controls">
+      <UniqueIdentifier>{415c1fb8-9511-41ea-9904-0d24785bb20f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SimpleEQ\Source\GUI\Components">
+      <UniqueIdentifier>{fae969b2-53e1-4c8f-b3fb-baa191f9f226}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SimpleEQ\Source\GUI\Theme">
+      <UniqueIdentifier>{13e8a0a1-e052-452b-a7a6-4bb17e9e6193}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -3591,17 +3600,26 @@
     <ClCompile Include="..\..\Source\FFTAnalyzer.cpp">
       <Filter>SimpleEQ\Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\RotarySliderWithLabels.cpp">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ResponseCurveComponent.cpp">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\MinimalCombo.cpp">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
+      <Filter>SimpleEQ\Source\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PowerButton.cpp">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
+      <Filter>SimpleEQ\Source\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CustomRotarySlider.cpp">
+      <Filter>SimpleEQ\Source\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ResponseCurveComponent.cpp">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\SectionPanel.cpp">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BandFilterSection.cpp">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CutFilterSection.cpp">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -7787,17 +7805,29 @@
     <ClInclude Include="..\..\Source\FFTAnalyzer.h">
       <Filter>SimpleEQ\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Theme.h">
+      <Filter>SimpleEQ\Source\GUI\Theme</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MinimalCombo.h">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
+      <Filter>SimpleEQ\Source\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PowerButton.h">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
+      <Filter>SimpleEQ\Source\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CustomRotarySlider.h">
+      <Filter>SimpleEQ\Source\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ResponseCurveComponent.h">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\RotarySliderWithLabels.h">
-      <Filter>SimpleEQ\Source\UI Components</Filter>
+    <ClInclude Include="..\..\Source\SectionPanel.h">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BandFilterSection.h">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CutFilterSection.h">
+      <Filter>SimpleEQ\Source\GUI\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

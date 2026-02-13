@@ -137,13 +137,16 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\BandFilterSection.cpp" />
+    <ClCompile Include="..\..\Source\CutFilterSection.cpp" />
     <ClCompile Include="..\..\Source\MinimalCombo.cpp" />
     <ClCompile Include="..\..\Source\FFTAnalyzer.cpp" />
     <ClCompile Include="..\..\Source\PluginProcessor.cpp" />
     <ClCompile Include="..\..\Source\PluginEditor.cpp" />
     <ClCompile Include="..\..\Source\PowerButton.cpp" />
-    <ClCompile Include="..\..\Source\RotarySliderWithLabels.cpp" />
+    <ClCompile Include="..\..\Source\CustomRotarySlider.cpp" />
     <ClCompile Include="..\..\Source\ResponseCurveComponent.cpp" />
+    <ClCompile Include="..\..\Source\SectionPanel.cpp" />
     <ClCompile Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2995,13 +2998,17 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\BandFilterSection.h" />
+    <ClInclude Include="..\..\Source\CutFilterSection.h" />
+    <ClInclude Include="..\..\Source\SectionPanel.h" />
+    <ClInclude Include="..\..\Source\Theme.h" />
     <ClInclude Include="..\..\Source\MinimalCombo.h" />
     <ClInclude Include="..\..\Source\FFTAnalyzer.h" />
     <ClInclude Include="..\..\Source\PluginProcessor.h" />
     <ClInclude Include="..\..\Source\PluginEditor.h" />
     <ClInclude Include="..\..\Source\PowerButton.h" />
     <ClInclude Include="..\..\Source\ResponseCurveComponent.h" />
-    <ClInclude Include="..\..\Source\RotarySliderWithLabels.h" />
+    <ClInclude Include="..\..\Source\CustomRotarySlider.h" />
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h" />
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h" />
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h" />

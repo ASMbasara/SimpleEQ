@@ -1,6 +1,6 @@
-#include "RotarySliderWithLabels.h"
+#include "CustomRotarySlider.h"
 
-void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider& slider)
+void CustomRotarySliderLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider& slider)
 {
     using namespace juce;
 
@@ -76,7 +76,8 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
     g.drawEllipse(center.x - knobRadius, center.y - knobRadius,
         knobRadius * 2, knobRadius * 2, 1.2f);
 
-    if (RotarySliderWithLabels* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider)) {
+    if (CustomRotarySlider* rswl = dynamic_cast<CustomRotarySlider*>(&slider)) 
+    {
         // Modern pointer/indicator
         auto sliderAngRad = jmap(sliderPos, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
 
@@ -120,7 +121,7 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
 }
 
 
-RotarySliderWithLabels::RotarySliderWithLabels(juce::RangedAudioParameter& rap,
+CustomRotarySlider::CustomRotarySlider(juce::RangedAudioParameter& rap,
     const juce::String& unitSuffix,
     const juce::String& parameterLabel) :
     juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag,
@@ -132,7 +133,12 @@ RotarySliderWithLabels::RotarySliderWithLabels(juce::RangedAudioParameter& rap,
     setLookAndFeel(&lnf);
 }
 
-void RotarySliderWithLabels::paint(juce::Graphics& g)
+CustomRotarySlider::~CustomRotarySlider()
+{
+    setLookAndFeel(nullptr);
+}
+
+void CustomRotarySlider::paint(juce::Graphics& g)
 {
     using namespace juce;
 
@@ -166,12 +172,7 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
         *this);
 }
 
-void RotarySliderWithLabels::resized()
-{
-    // Component handles its own layout including label space
-}
-
-juce::String RotarySliderWithLabels::getDisplayString() const
+juce::String CustomRotarySlider::getDisplayString() const
 {
     if (juce::AudioParameterChoice* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(param)) {
         juce::String val = choiceParam->getCurrentChoiceName();
@@ -211,7 +212,7 @@ juce::String RotarySliderWithLabels::getDisplayString() const
     return str;
 }
 
-juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds()
+juce::Rectangle<int> CustomRotarySlider::getSliderBounds()
 {
     auto bounds = getLocalBounds();
 
@@ -231,4 +232,9 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds()
     r.setY(JUCE_LIVE_CONSTANT(10));
 
     return r;
+}
+
+void CustomRotarySlider::setParameterLabel(const juce::String& label)
+{
+    paramLabel = label;
 }

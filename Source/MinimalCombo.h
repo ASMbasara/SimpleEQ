@@ -1,6 +1,5 @@
 #pragma once
 #include <JuceHeader.h>
-#include "Looks.h"
 #include "PluginProcessor.h"
 
 class MinimalComboLookAndFeel : public juce::LookAndFeel_V4
