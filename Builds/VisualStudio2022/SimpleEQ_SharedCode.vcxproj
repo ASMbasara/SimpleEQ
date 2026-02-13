@@ -3000,6 +3000,8 @@
     <ClInclude Include="..\..\Source\PluginProcessor.h" />
     <ClInclude Include="..\..\Source\PluginEditor.h" />
     <ClInclude Include="..\..\Source\PowerButton.h" />
+    <ClInclude Include="..\..\Source\ResponseCurveComponent.h" />
+    <ClInclude Include="..\..\Source\RotarySliderWithLabels.h" />
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h" />
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h" />
     <ClInclude Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h" />

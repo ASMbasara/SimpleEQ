@@ -700,18 +700,15 @@
     <Filter Include="JUCE Library Code">
       <UniqueIdentifier>{7ED5A90E-41AF-A1EF-659B-37CEEAB9BA61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SimpleEQ\Source\UI Components">
+      <UniqueIdentifier>{f426634b-78ca-4b19-882e-e11162935c12}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp">
       <Filter>SimpleEQ\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PluginEditor.cpp">
-      <Filter>SimpleEQ\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\RotarySliderWithLabels.cpp">
-      <Filter>SimpleEQ\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ResponseCurveComponent.cpp">
       <Filter>SimpleEQ\Source</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\jhvaz\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.cpp">
@@ -3594,11 +3591,17 @@
     <ClCompile Include="..\..\Source\FFTAnalyzer.cpp">
       <Filter>SimpleEQ\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\RotarySliderWithLabels.cpp">
+      <Filter>SimpleEQ\Source\UI Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ResponseCurveComponent.cpp">
+      <Filter>SimpleEQ\Source\UI Components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\MinimalCombo.cpp">
-      <Filter>SimpleEQ\Source</Filter>
+      <Filter>SimpleEQ\Source\UI Components</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\PowerButton.cpp">
-      <Filter>SimpleEQ\Source</Filter>
+      <Filter>SimpleEQ\Source\UI Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -7785,10 +7788,16 @@
       <Filter>SimpleEQ\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MinimalCombo.h">
-      <Filter>SimpleEQ\Source</Filter>
+      <Filter>SimpleEQ\Source\UI Components</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\PowerButton.h">
-      <Filter>SimpleEQ\Source</Filter>
+      <Filter>SimpleEQ\Source\UI Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ResponseCurveComponent.h">
+      <Filter>SimpleEQ\Source\UI Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RotarySliderWithLabels.h">
+      <Filter>SimpleEQ\Source\UI Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
